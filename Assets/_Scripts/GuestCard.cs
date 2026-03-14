@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -8,6 +9,14 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     [Header("UI")]
     [SerializeField] private TMP_Text nameText;
     [SerializeField] private Button button;
+
+    [SerializeField] private List<RoomTrait> preferredTraits = new List<RoomTrait>();
+    public IReadOnlyList<RoomTrait> PreferredTraits => preferredTraits;
+
+    [Header("Trait Icons")]
+    [SerializeField] private RoomTraitIconDatabase traitIconDatabase;
+    [SerializeField] private Transform traitIconContainer;
+    [SerializeField] private GameObject traitIconPrefab;
 
     [Header("Selection Visual")]
     [SerializeField] private RectTransform visualRoot;
@@ -35,11 +44,9 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     private RectTransform visualRect;
     private RectTransform rootRect;
 
-    // Visual pose (selection + hover combined)
     private Vector2 targetVisualOffset;
     private Vector3 targetVisualScale = Vector3.one;
 
-    // Hand fan pose
     private Vector2 targetHandAnchoredPos;
     private float targetHandRotationZ;
 
@@ -102,6 +109,7 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
         RefreshVisualTargets(true);
         SetHandPose(Vector2.zero, 0f, true);
+        RefreshTraitIcons();
     }
 
     public void SetSelected(bool selected, bool instant = false)
@@ -233,6 +241,99 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         {
             rootRect.anchoredPosition = Vector2.zero;
             rootRect.localRotation = Quaternion.identity;
+        }
+    }
+
+    public int CountMatchedTraits(RoomSlot room)
+    {
+        if (room == null)
+            return 0;
+
+        int matches = 0;
+
+        for (int i = 0; i < preferredTraits.Count; i++)
+        {
+            if (room.HasTrait(preferredTraits[i]))
+                matches++;
+        }
+
+        return matches;
+    }
+
+    public bool IsPerfectMatch(RoomSlot room)
+    {
+        if (room == null)
+            return false;
+
+        for (int i = 0; i < preferredTraits.Count; i++)
+        {
+            if (!room.HasTrait(preferredTraits[i]))
+                return false;
+        }
+
+        return true;
+    }
+
+    public void SetPreferredTraits(List<RoomTrait> newTraits)
+    {
+        preferredTraits.Clear();
+
+        if (newTraits != null)
+            preferredTraits.AddRange(newTraits);
+
+        RefreshTraitIcons();
+    }
+
+    private void RefreshTraitIcons()
+    {
+        if (traitIconContainer == null)
+        {
+            Debug.LogWarning($"{name}: GuestCard traitIconContainer is not assigned.");
+            return;
+        }
+
+        if (traitIconPrefab == null)
+        {
+            Debug.LogWarning($"{name}: GuestCard traitIconPrefab is not assigned.");
+            return;
+        }
+
+        if (traitIconDatabase == null)
+        {
+            Debug.LogWarning($"{name}: GuestCard traitIconDatabase is not assigned.");
+            return;
+        }
+
+        for (int i = traitIconContainer.childCount - 1; i >= 0; i--)
+        {
+            Destroy(traitIconContainer.GetChild(i).gameObject);
+        }
+
+        for (int i = 0; i < preferredTraits.Count; i++)
+        {
+            RoomTrait trait = preferredTraits[i];
+            GameObject iconObj = Instantiate(traitIconPrefab, traitIconContainer);
+
+            Sprite iconSprite = traitIconDatabase.GetIcon(trait);
+
+            TraitIconUI iconUI = iconObj.GetComponent<TraitIconUI>();
+            if (iconUI != null)
+            {
+                iconUI.SetSprite(iconSprite);
+            }
+            else
+            {
+                Image image = iconObj.GetComponent<Image>();
+                if (image != null)
+                {
+                    image.sprite = iconSprite;
+                    image.enabled = iconSprite != null;
+                }
+                else
+                {
+                    Debug.LogWarning($"{iconObj.name}: spawned trait icon prefab has no TraitIconUI or Image.");
+                }
+            }
         }
     }
 }

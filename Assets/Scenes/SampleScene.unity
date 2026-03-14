@@ -152,21 +152,18 @@ MonoBehaviour:
   roomSlotPrefab: {fileID: 4510929986647887564, guid: f31aba29c8724d447876046056a300bf, type: 3}
   roomGridParent: {fileID: 1328885069}
   roomSlots: []
-  deckManager: {fileID: 641479579}
   handManager: {fileID: 977239539}
+  levelConfig: {fileID: 11400000, guid: 8922325126d9be9478f84af6cced46d5, type: 2}
   debugText: {fileID: 0}
   deckCountText: {fileID: 0}
-  drawButton: {fileID: 0}
+  drawButton: {fileID: 1091396854}
   startingDrawAmount: 5
   drawAmountPerRefill: 1
-  floorCount: 3
-  roomsPerFloor: 3
-  topFloorFirst: 1
   animationLayer: {fileID: 800655219}
   drawSpawnPoint: {fileID: 1482011480}
   cardMoveDuration: 0.22
-  drawStartRotationZ: -12
-  drawOvershootDistance: 16
+  drawStartRotationZ: -16
+  drawOvershootDistance: -50
   drawSettleDuration: 0.08
   drawStaggerDelay: 0.03
 --- !u!4 &8187146
@@ -651,65 +648,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 140}
   m_SizeDelta: {x: 700, y: 760}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &641479578
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 641479580}
-  - component: {fileID: 641479579}
-  m_Layer: 0
-  m_Name: DeckManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &641479579
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 641479578}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ead176b0d16ced541b1ca8654bed36b9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DeckManager
-  placeholderNames:
-  - Alex
-  - Sam
-  - Jordan
-  - Taylor
-  - Casey
-  - Morgan
-  - Jamie
-  - Drew
-  - Avery
-  - Quinn
-  - Riley
-  - Skyler
-  - John
-  - Sarah
---- !u!4 &641479580
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 641479578}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 292.51978, y: 150.68854, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &800655218
 GameObject:
   m_ObjectHideFlags: 0
@@ -934,7 +872,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 189, y: 300}
+  m_AnchoredPosition: {x: 167, y: 164}
   m_SizeDelta: {x: 160, y: 220}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1091396854
@@ -1101,7 +1039,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_StartCorner: 0
+  m_StartCorner: 2
   m_StartAxis: 0
   m_CellSize: {x: 160, y: 220}
   m_Spacing: {x: 100, y: 25}
@@ -1267,5 +1205,4 @@ SceneRoots:
   - {fileID: 8187146}
   - {fileID: 914929293}
   - {fileID: 2022337399}
-  - {fileID: 641479580}
   - {fileID: 977239540}

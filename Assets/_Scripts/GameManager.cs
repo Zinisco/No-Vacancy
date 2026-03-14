@@ -15,8 +15,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private List<RoomSlot> roomSlots = new();
 
     [Header("Managers")]
-    [SerializeField] private DeckManager deckManager;
     [SerializeField] private HandManager handManager;
+
+    [Header("Level Data")]
+    [SerializeField] private LevelConfig levelConfig;
 
     [Header("UI")]
     [SerializeField] private TMP_Text debugText;
@@ -26,12 +28,6 @@ public class GameManager : MonoBehaviour
     [Header("Draw Settings")]
     [SerializeField] private int startingDrawAmount = 5;
     [SerializeField] private int drawAmountPerRefill = 3;
-
-
-    [Header("Board Settings")]
-    [SerializeField] private int floorCount = 3;
-    [SerializeField] private int roomsPerFloor = 3;
-    [SerializeField] private bool topFloorFirst = true;
 
     [Header("Animation")]
     [SerializeField] private RectTransform animationLayer;
@@ -44,6 +40,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float drawSettleDuration = 0.08f;
     [SerializeField] private float drawStaggerDelay = 0.03f;
 
+    private int nextCardId = 0;
+    private Queue<LevelGuestEntry> guestQueue = new();
     private GuestCard selectedCard;
     private bool isBusy;
 
@@ -63,47 +61,61 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Optional: clear old spawned rooms if restarting
+        if (levelConfig == null)
+        {
+            Log("Missing LevelConfig.");
+            return;
+        }
+
         for (int i = roomGridParent.childCount - 1; i >= 0; i--)
         {
             Destroy(roomGridParent.GetChild(i).gameObject);
         }
 
-        if (topFloorFirst)
+        for (int i = 0; i < levelConfig.rooms.Count; i++)
         {
-            for (int floor = floorCount; floor >= 1; floor--)
-            {
-                for (int room = 1; room <= roomsPerFloor; room++)
-                {
-                    SpawnRoomSlot(floor, room);
-                }
-            }
-        }
-        else
-        {
-            for (int floor = 1; floor <= floorCount; floor++)
-            {
-                for (int room = 1; room <= roomsPerFloor; room++)
-                {
-                    SpawnRoomSlot(floor, room);
-                }
-            }
+            SpawnRoomSlot(levelConfig.rooms[i]);
         }
     }
 
     private void StartGame()
     {
-        if (deckManager == null || handManager == null)
+        if (handManager == null)
         {
-            Log("Missing DeckManager or HandManager.");
+            Log("Missing HandManager.");
             return;
         }
+
+        if (levelConfig == null)
+        {
+            Log("Missing LevelConfig.");
+            return;
+        }
+
+        if (levelConfig.rooms.Count == 0)
+        {
+            Log("LevelConfig has no rooms.");
+            return;
+        }
+
+        if (levelConfig.guests.Count == 0)
+        {
+            Log("LevelConfig has no guests.");
+            return;
+        }
+
+        guestQueue.Clear();
+        for (int i = 0; i < levelConfig.guests.Count; i++)
+        {
+            guestQueue.Enqueue(levelConfig.guests[i]);
+        }
+
+        nextCardId = 0;
 
         int roomCount = roomSlots.Count;
         int clampedHandSize = Mathf.Min(handManager.BaseMaxHandSize, roomCount);
 
         handManager.SetMaxHandSize(clampedHandSize);
-        deckManager.BuildDeck(roomCount);
 
         DrawCards(startingDrawAmount);
 
@@ -143,41 +155,6 @@ public class GameManager : MonoBehaviour
         Log($"Selected {card.DisplayName} from {location}");
     }
 
-    public void OnRoomClicked(RoomSlot room)
-    {
-        if (room == null || isBusy)
-            return;
-
-        StartCoroutine(HandleRoomInteraction(room));
-    }
-
-    public void OnGuestCardClicked(GuestCard card)
-    {
-        if (card == null || isBusy)
-            return;
-
-        if (card.CurrentLocationType == CardLocationType.Hand)
-        {
-            SelectCard(card);
-            return;
-        }
-
-        if (card.CurrentLocationType == CardLocationType.Room && card.CurrentRoom != null)
-        {
-            if (selectedCard == null)
-            {
-                StartCoroutine(HandleRoomInteraction(card.CurrentRoom));
-                return;
-            }
-
-            if (selectedCard.CurrentLocationType == CardLocationType.Hand)
-            {
-                StartCoroutine(HandleRoomInteraction(card.CurrentRoom));
-                return;
-            }
-        }
-    }
-
     public void OnGuestCardRightClicked(GuestCard card)
     {
         if (card == null || isBusy)
@@ -195,7 +172,7 @@ public class GameManager : MonoBehaviour
         if (isBusy)
             return;
 
-        if (!deckManager.HasCardsRemaining())
+        if (guestQueue.Count == 0)
         {
             Log("Deck is empty.");
             return;
@@ -266,10 +243,10 @@ public class GameManager : MonoBehaviour
 
     private void RefreshDrawButtonState()
     {
-        if (drawButton == null || deckManager == null || handManager == null)
+        if (drawButton == null || handManager == null)
             return;
 
-        bool canDraw = !isBusy && deckManager.HasCardsRemaining() && handManager.HasSpace;
+        bool canDraw = !isBusy && guestQueue.Count > 0 && handManager.HasSpace;
         drawButton.interactable = canDraw;
     }
 
@@ -436,7 +413,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator DrawCardsRoutine(int amount)
     {
-        if (deckManager == null || guestCardPrefab == null || handManager == null)
+        if (guestCardPrefab == null || handManager == null)
             yield break;
 
         isBusy = true;
@@ -444,10 +421,14 @@ public class GameManager : MonoBehaviour
 
         int drawsRemaining = amount;
 
-        while (drawsRemaining > 0 && handManager.HasSpace && deckManager.HasCardsRemaining())
+        while (drawsRemaining > 0 && handManager.HasSpace && guestQueue.Count > 0)
         {
-            string guestName = deckManager.DrawName();
-            string cardId = deckManager.GenerateCardId();
+            LevelGuestEntry guestData = guestQueue.Dequeue();
+
+            string guestName = guestData.guestName;
+            List<RoomTrait> preferredTraitsToUse = guestData.preferredTraits;
+            nextCardId++;
+            string cardId = $"CARD_{nextCardId:D3}";
 
             RectTransform spawnParent = animationLayer != null
                 ? animationLayer
@@ -457,6 +438,7 @@ public class GameManager : MonoBehaviour
             RectTransform newCardRect = newCard.transform as RectTransform;
 
             newCard.Initialize(cardId, guestName, this);
+            newCard.SetPreferredTraits(preferredTraitsToUse);
 
             if (newCardRect != null && drawSpawnPoint != null)
             {
@@ -601,16 +583,11 @@ public class GameManager : MonoBehaviour
         card.SetInRoom(room);
     }
 
-    private void SpawnRoomSlot(int floor, int roomIndex)
+    private void SpawnRoomSlot(LevelRoomEntry roomData)
     {
         RoomSlot newRoom = Instantiate(roomSlotPrefab, roomGridParent);
-
-        string roomNumber = $"{floor}{roomIndex:00}";
-        // Example:
-        // floor 3, room 1 -> "301"
-        // floor 2, room 3 -> "203"
-
-        newRoom.Initialize(this, roomNumber);
+        newRoom.Initialize(this, roomData.roomNumber);
+        newRoom.SetTraits(roomData.traits);
         roomSlots.Add(newRoom);
     }
 
@@ -629,8 +606,8 @@ public class GameManager : MonoBehaviour
 
     private void UpdateDeckCountText()
     {
-        if (deckCountText != null && deckManager != null)
-            deckCountText.text = $"Deck: {deckManager.RemainingCount()}";
+        if (deckCountText != null && handManager != null)
+            deckCountText.text = $"Deck: {guestQueue.Count}   Hand: {handManager.CurrentHandCount}/{handManager.CurrentMaxHandSize}";
     }
 
     private IEnumerator AnimateCardToTarget(GuestCard card, Transform targetParent)
@@ -673,62 +650,6 @@ public class GameManager : MonoBehaviour
         card.transform.SetParent(targetParent, false);
         cardRect.anchoredPosition = Vector2.zero;
         cardRect.localScale = Vector3.one;
-    }
-
-    private IEnumerator HandleRoomInteraction(RoomSlot room)
-    {
-        if (isBusy)
-            yield break;
-
-        isBusy = true;
-
-        if (room == null)
-        {
-            isBusy = false;
-            yield break;
-        }
-
-        if (selectedCard == null)
-        {
-            if (room.HasCard())
-            {
-                yield return StartCoroutine(ReturnRoomCardToHand(room));
-            }
-            else
-            {
-                Log("No card selected.");
-            }
-
-            isBusy = false;
-            yield break;
-        }
-
-        if (selectedCard.CurrentLocationType != CardLocationType.Hand)
-        {
-            Log("Select a hand card to place or swap.");
-            isBusy = false;
-            yield break;
-        }
-
-        if (!room.HasCard())
-        {
-            string cardName = selectedCard.DisplayName;
-            yield return StartCoroutine(MoveHandCardToRoom(selectedCard, room));
-            Log($"Placed {cardName} into {room.GetHolderName()}");
-        }
-        else
-        {
-            string handCardName = selectedCard.DisplayName;
-            string previousRoomGuestName = room.CurrentCard.DisplayName;
-            yield return StartCoroutine(SwapHandCardWithRoomCard(selectedCard, room));
-            Log($"Swapped {handCardName} with {previousRoomGuestName}");
-        }
-
-        DeselectCurrentCard();
-        UpdateDeckCountText();
-        RefreshDrawButtonState();
-
-        isBusy = false;
     }
 
     private void Log(string message)

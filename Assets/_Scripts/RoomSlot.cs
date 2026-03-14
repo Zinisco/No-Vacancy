@@ -1,22 +1,63 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class RoomSlot : MonoBehaviour, IPointerClickHandler
+public class RoomSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Room Data")]
     [SerializeField] private string roomNumber = "101";
+
+    [SerializeField] private List<RoomTrait> traits = new List<RoomTrait>();
+    public IReadOnlyList<RoomTrait> Traits => traits;
 
     [Header("Refs")]
     [SerializeField] private TMP_Text roomNumberText;
     [SerializeField] private Transform cardAnchor;
     [SerializeField] private Button button;
 
+    [Header("Trait Icons")]
+    [SerializeField] private RoomTraitIconDatabase traitIconDatabase;
+    [SerializeField] private Transform traitIconContainer;
+    [SerializeField] private GameObject traitIconPrefab;
+
+    [Header("Hover Scale")]
+    [SerializeField] private RectTransform scaleTarget;
+    [SerializeField] private float hoverScale = 1.1f;
+    [SerializeField] private float scaleSpeed = 10f;
+
     public GuestCard CurrentCard { get; private set; }
     public string RoomNumber => roomNumber;
 
     private GameManager gameManager;
+
+    private Vector3 baseScale;
+    private Vector3 targetScale;
+
+    private void Awake()
+    {
+        if (scaleTarget == null)
+            scaleTarget = transform as RectTransform;
+
+        if (scaleTarget != null)
+        {
+            baseScale = scaleTarget.localScale;
+            targetScale = baseScale;
+        }
+    }
+
+    private void Update()
+    {
+        if (scaleTarget == null)
+            return;
+
+        scaleTarget.localScale = Vector3.Lerp(
+            scaleTarget.localScale,
+            targetScale,
+            Time.deltaTime * scaleSpeed
+        );
+    }
 
     public void Initialize(GameManager manager, string newRoomNumber)
     {
@@ -25,6 +66,8 @@ public class RoomSlot : MonoBehaviour, IPointerClickHandler
 
         if (roomNumberText != null)
             roomNumberText.text = roomNumber;
+
+        RefreshTraitIcons();
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -40,6 +83,16 @@ public class RoomSlot : MonoBehaviour, IPointerClickHandler
         {
             gameManager.OnRoomRightClicked(this);
         }
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        targetScale = baseScale * hoverScale;
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        targetScale = baseScale;
     }
 
     public bool HasCard()
@@ -65,5 +118,73 @@ public class RoomSlot : MonoBehaviour, IPointerClickHandler
     public string GetHolderName()
     {
         return $"Room {roomNumber}";
+    }
+
+    public bool HasTrait(RoomTrait trait)
+    {
+        return traits.Contains(trait);
+    }
+
+    public void SetTraits(List<RoomTrait> newTraits)
+    {
+        traits.Clear();
+
+        if (newTraits != null)
+            traits.AddRange(newTraits);
+
+        RefreshTraitIcons();
+    }
+
+    private void RefreshTraitIcons()
+    {
+        if (traitIconContainer == null)
+        {
+            Debug.LogWarning($"{name}: RoomSlot traitIconContainer is not assigned.");
+            return;
+        }
+
+        if (traitIconPrefab == null)
+        {
+            Debug.LogWarning($"{name}: RoomSlot traitIconPrefab is not assigned.");
+            return;
+        }
+
+        if (traitIconDatabase == null)
+        {
+            Debug.LogWarning($"{name}: RoomSlot traitIconDatabase is not assigned.");
+            return;
+        }
+
+        for (int i = traitIconContainer.childCount - 1; i >= 0; i--)
+        {
+            Destroy(traitIconContainer.GetChild(i).gameObject);
+        }
+
+        for (int i = 0; i < traits.Count; i++)
+        {
+            RoomTrait trait = traits[i];
+            GameObject iconObj = Instantiate(traitIconPrefab, traitIconContainer);
+
+            Sprite iconSprite = traitIconDatabase.GetIcon(trait);
+
+            TraitIconUI iconUI = iconObj.GetComponent<TraitIconUI>();
+            if (iconUI != null)
+            {
+                iconUI.SetSprite(iconSprite);
+            }
+            else
+            {
+                Image image = iconObj.GetComponent<Image>();
+                if (image != null)
+                {
+                    image.sprite = iconSprite;
+                    image.enabled = iconSprite != null;
+                }
+                else
+                {
+                    Debug.LogWarning($"{iconObj.name}: spawned trait icon prefab has no TraitIconUI or Image.");
+                }
+            }
+        }
     }
 }

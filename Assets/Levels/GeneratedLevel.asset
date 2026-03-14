@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 993aaf6be17430048bcf3c4c153a53a7, type: 3}
+  m_Name: GeneratedLevel
+  m_EditorClassIdentifier: Assembly-CSharp::LevelConfig
+  rooms:
+  - roomNumber: 101
+    traits: 020000000000000006000000
+  - roomNumber: 102
+    traits: 030000000000000006000000
+  - roomNumber: 103
+    traits: 010000000300000006000000
+  - roomNumber: 201
+    traits: 0100000006000000
+  - roomNumber: 202
+    traits: 000000000600000002000000
+  - roomNumber: 203
+    traits: 030000000100000005000000
+  - roomNumber: 301
+    traits: 0000000005000000
+  - roomNumber: 302
+    traits: 0600000001000000
+  - roomNumber: 303
+    traits: 060000000300000000000000
+  guests:
+  - guestName: Riley
+    preferredTraits: 02000000
+  - guestName: Logan
+    preferredTraits: 03000000
+  - guestName: Avery
+    preferredTraits: 060000000300000001000000
+  - guestName: Jamie
+    preferredTraits: 0100000006000000
+  - guestName: Emerson
+    preferredTraits: 00000000
+  - guestName: Jordan
+    preferredTraits: 0500000001000000
+  - guestName: Morgan
+    preferredTraits: 0000000005000000
+  - guestName: Quinn
+    preferredTraits: 06000000
+  - guestName: Dakota
+    preferredTraits: 03000000
