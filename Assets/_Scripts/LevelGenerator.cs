@@ -5,44 +5,94 @@ public static class LevelGenerator
 {
     public static List<GeneratedRoomData> GenerateRooms(LevelGeneratorSettings settings)
     {
-        List<GeneratedRoomData> rooms = new();
+        List<GeneratedRoomData> slots = new();
 
         if (settings == null)
-            return rooms;
+            return slots;
+
+        int totalColumnsPerFloor = settings.roomsPerFloor + 1;
+        int elevatorColumn = Mathf.Clamp(settings.elevatorColumnIndex, 0, settings.roomsPerFloor);
 
         if (settings.topFloorFirst)
         {
             for (int floor = settings.floorCount; floor >= 1; floor--)
             {
-                for (int room = 1; room <= settings.roomsPerFloor; room++)
-                {
-                    GeneratedRoomData data = new GeneratedRoomData();
-                    data.roomNumber = $"{floor}{room:00}";
-                    data.traits = GenerateRoomTraits(settings);
-                    rooms.Add(data);
-                }
+                GenerateFloor(settings, slots, floor, elevatorColumn, totalColumnsPerFloor);
             }
         }
         else
         {
             for (int floor = 1; floor <= settings.floorCount; floor++)
             {
-                for (int room = 1; room <= settings.roomsPerFloor; room++)
-                {
-                    GeneratedRoomData data = new GeneratedRoomData();
-                    data.roomNumber = $"{floor}{room:00}";
-                    data.traits = GenerateRoomTraits(settings);
-                    rooms.Add(data);
-                }
+                GenerateFloor(settings, slots, floor, elevatorColumn, totalColumnsPerFloor);
             }
         }
 
-        return rooms;
+        ApplyNearElevatorTraits(slots);
+
+        return slots;
+    }
+
+    private static void GenerateFloor(
+    LevelGeneratorSettings settings,
+    List<GeneratedRoomData> slots,
+    int floorNumber,
+    int elevatorColumn,
+    int totalColumnsPerFloor)
+    {
+        List<GeneratedRoomData> floorSlots = new();
+
+        for (int column = 0; column < totalColumnsPerFloor; column++)
+        {
+            if (column == elevatorColumn)
+            {
+                GeneratedRoomData elevator = new GeneratedRoomData
+                {
+                    roomNumber = $"E{floorNumber}",
+                    slotType = SlotType.Elevator,
+                    floorIndex = floorNumber,
+                    columnIndex = column,
+                    traits = new List<RoomTrait>()
+                };
+
+                floorSlots.Add(elevator);
+            }
+            else
+            {
+                GeneratedRoomData room = new GeneratedRoomData
+                {
+                    roomNumber = "",
+                    slotType = SlotType.Room,
+                    floorIndex = floorNumber,
+                    columnIndex = column,
+                    traits = GenerateRoomTraits(settings)
+                };
+
+                floorSlots.Add(room);
+            }
+        }
+
+        AssignRoomNumbersByElevatorPattern(floorSlots, floorNumber, elevatorColumn);
+
+        for (int i = 0; i < floorSlots.Count; i++)
+            slots.Add(floorSlots[i]);
     }
 
     private static List<RoomTrait> GenerateRoomTraits(LevelGeneratorSettings settings)
     {
-        List<RoomTrait> pool = new List<RoomTrait>(settings.allowedTraits);
+        List<RoomTrait> pool = new();
+
+        for (int i = 0; i < settings.allowedTraits.Count; i++)
+        {
+            RoomTrait trait = settings.allowedTraits[i];
+
+            // This trait is now derived from layout, not randomly generated.
+            if (trait == RoomTrait.NearElevator)
+                continue;
+
+            pool.Add(trait);
+        }
+
         Shuffle(pool);
 
         int targetCount = Random.Range(settings.minTraitsPerRoom, settings.maxTraitsPerRoom + 1);
@@ -66,32 +116,122 @@ public static class LevelGenerator
                 break;
         }
 
-        // Safety fallback so we never return empty if settings are weird.
         if (result.Count == 0 && pool.Count > 0)
             result.Add(pool[0]);
 
         return result;
     }
 
-    public static List<GeneratedGuestData> GenerateGuests(LevelGeneratorSettings settings, List<GeneratedRoomData> rooms)
+    private static void AssignRoomNumbersByElevatorPattern(
+     List<GeneratedRoomData> floorSlots,
+     int floorNumber,
+     int elevatorColumn)
+    {
+        List<GeneratedRoomData> leftRooms = new();
+        List<GeneratedRoomData> rightRooms = new();
+
+        for (int i = 0; i < floorSlots.Count; i++)
+        {
+            GeneratedRoomData slot = floorSlots[i];
+
+            if (slot.slotType != SlotType.Room)
+                continue;
+
+            if (slot.columnIndex < elevatorColumn)
+                leftRooms.Add(slot);
+            else if (slot.columnIndex > elevatorColumn)
+                rightRooms.Add(slot);
+        }
+
+        // Left side: closest to elevator gets smallest numbers first.
+        // So sort descending by column so the room nearest elevator comes first.
+        leftRooms.Sort((a, b) => b.columnIndex.CompareTo(a.columnIndex));
+
+        // Right side: closest to elevator gets smallest numbers first.
+        // So sort ascending by column.
+        rightRooms.Sort((a, b) => a.columnIndex.CompareTo(b.columnIndex));
+
+        int nextRoomNumber = 1;
+
+        for (int i = 0; i < leftRooms.Count; i++)
+        {
+            leftRooms[i].roomNumber = $"{floorNumber}{nextRoomNumber:00}";
+            nextRoomNumber++;
+        }
+
+        for (int i = 0; i < rightRooms.Count; i++)
+        {
+            rightRooms[i].roomNumber = $"{floorNumber}{nextRoomNumber:00}";
+            nextRoomNumber++;
+        }
+    }
+
+    private static void ApplyNearElevatorTraits(List<GeneratedRoomData> slots)
+    {
+        for (int i = 0; i < slots.Count; i++)
+        {
+            GeneratedRoomData slot = slots[i];
+
+            if (slot.slotType != SlotType.Room)
+                continue;
+
+            bool nearElevator = false;
+
+            for (int j = 0; j < slots.Count; j++)
+            {
+                GeneratedRoomData other = slots[j];
+
+                if (other.slotType != SlotType.Elevator)
+                    continue;
+
+                if (slot.floorIndex != other.floorIndex)
+                    continue;
+
+                if (Mathf.Abs(slot.columnIndex - other.columnIndex) == 1)
+                {
+                    nearElevator = true;
+                    break;
+                }
+            }
+
+            if (nearElevator && !slot.traits.Contains(RoomTrait.NearElevator))
+                slot.traits.Add(RoomTrait.NearElevator);
+
+            if (!nearElevator && slot.traits.Contains(RoomTrait.NearElevator))
+                slot.traits.Remove(RoomTrait.NearElevator);
+        }
+    }
+
+    public static List<GeneratedGuestData> GenerateGuests(LevelGeneratorSettings settings, List<GeneratedRoomData> slots)
     {
         List<GeneratedGuestData> guests = new();
 
-        if (settings == null || rooms == null || rooms.Count == 0)
+        if (settings == null || slots == null || slots.Count == 0)
             return guests;
 
-        int guestCount = rooms.Count;
+        List<GeneratedRoomData> actualRooms = new();
+
+        for (int i = 0; i < slots.Count; i++)
+        {
+            if (slots[i].slotType == SlotType.Room)
+                actualRooms.Add(slots[i]);
+        }
+
+        if (actualRooms.Count == 0)
+            return guests;
 
         List<string> shuffledNames = new(settings.possibleGuestNames);
         Shuffle(shuffledNames);
 
-        for (int i = 0; i < guestCount; i++)
+        for (int i = 0; i < actualRooms.Count; i++)
         {
-            GeneratedRoomData sourceRoom = rooms[i];
+            GeneratedRoomData sourceRoom = actualRooms[i];
 
-            GeneratedGuestData guest = new GeneratedGuestData();
-            guest.guestName = i < shuffledNames.Count ? shuffledNames[i] : $"Guest {i + 1}";
-            guest.preferredTraits = GenerateGuestPreferencesFromRoom(settings, sourceRoom);
+            GeneratedGuestData guest = new GeneratedGuestData
+            {
+                guestName = i < shuffledNames.Count ? shuffledNames[i] : $"Guest {i + 1}",
+                preferredTraits = GenerateGuestPreferencesFromRoom(settings, sourceRoom)
+            };
 
             guests.Add(guest);
         }
@@ -101,7 +241,7 @@ public static class LevelGenerator
 
     private static List<RoomTrait> GenerateGuestPreferencesFromRoom(LevelGeneratorSettings settings, GeneratedRoomData room)
     {
-        List<RoomTrait> shuffled = new List<RoomTrait>(room.traits);
+        List<RoomTrait> shuffled = new(room.traits);
         Shuffle(shuffled);
 
         int prefCount = Random.Range(settings.minPreferencesPerGuest, settings.maxPreferencesPerGuest + 1);
@@ -125,8 +265,6 @@ public static class LevelGenerator
                 break;
         }
 
-        // Because prefs are chosen from room.traits, this should rarely matter,
-        // but keep the same safety fallback.
         if (prefs.Count == 0 && shuffled.Count > 0)
             prefs.Add(shuffled[0]);
 

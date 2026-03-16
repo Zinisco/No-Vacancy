@@ -13,6 +13,9 @@ public class LevelGeneratorSettings : ScriptableObject
     public int roomsPerFloor = 3;
     public bool topFloorFirst = false;
 
+    [Tooltip("Column index where the elevator is inserted. 0 = before first room, 1 = after first room, etc.")]
+    public int elevatorColumnIndex = 1;
+
     [Header("Generation")]
     public int minTraitsPerRoom = 2;
     public int maxTraitsPerRoom = 4;

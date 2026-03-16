@@ -2,12 +2,22 @@ using System.Collections.Generic;
 
 public static class LevelValidator
 {
-    public static bool CanSolve(List<GeneratedRoomData> rooms, List<GeneratedGuestData> guests)
+    public static bool CanSolve(List<GeneratedRoomData> slots, List<GeneratedGuestData> guests)
     {
-        if (rooms == null || guests == null) return false;
-        if (guests.Count > rooms.Count) return false;
+        if (slots == null || guests == null)
+            return false;
 
-        // Reject internally contradictory rooms or guests.
+        List<GeneratedRoomData> rooms = new();
+
+        for (int i = 0; i < slots.Count; i++)
+        {
+            if (slots[i].slotType == SlotType.Room)
+                rooms.Add(slots[i]);
+        }
+
+        if (guests.Count > rooms.Count)
+            return false;
+
         for (int i = 0; i < rooms.Count; i++)
         {
             if (RoomTraitRules.HasAnyConflict(rooms[i].traits))

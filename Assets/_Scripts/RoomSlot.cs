@@ -6,8 +6,11 @@ using UnityEngine.UI;
 
 public class RoomSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    [Header("Room Data")]
+    [Header("Slot Data")]
     [SerializeField] private string roomNumber = "101";
+    [SerializeField] private SlotType slotType = SlotType.Room;
+    [SerializeField] private int floorIndex;
+    [SerializeField] private int columnIndex;
 
     [SerializeField] private List<RoomTrait> traits = new List<RoomTrait>();
     public IReadOnlyList<RoomTrait> Traits => traits;
@@ -29,6 +32,12 @@ public class RoomSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
 
     public GuestCard CurrentCard { get; private set; }
     public string RoomNumber => roomNumber;
+    public SlotType Type => slotType;
+    public bool IsElevator => slotType == SlotType.Elevator;
+    public bool CanAcceptGuest => slotType == SlotType.Room;
+
+    public int FloorIndex => floorIndex;
+    public int ColumnIndex => columnIndex;
 
     private GameManager gameManager;
 
@@ -59,10 +68,18 @@ public class RoomSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         );
     }
 
-    public void Initialize(GameManager manager, string newRoomNumber)
+    public void Initialize(GameManager manager, LevelRoomEntry data)
     {
         gameManager = manager;
-        roomNumber = newRoomNumber;
+
+        roomNumber = data.roomNumber;
+        slotType = data.slotType;
+        floorIndex = data.floorIndex;
+        columnIndex = data.columnIndex;
+
+        traits.Clear();
+        if (data.traits != null)
+            traits.AddRange(data.traits);
 
         if (roomNumberText != null)
             roomNumberText.text = roomNumber;
@@ -102,6 +119,9 @@ public class RoomSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
 
     public void SetCard(GuestCard card)
     {
+        if (!CanAcceptGuest)
+            return;
+
         CurrentCard = card;
     }
 
@@ -117,7 +137,7 @@ public class RoomSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
 
     public string GetHolderName()
     {
-        return $"Room {roomNumber}";
+        return IsElevator ? "Elevator" : $"Room {roomNumber}";
     }
 
     public bool HasTrait(RoomTrait trait)
@@ -135,30 +155,45 @@ public class RoomSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         RefreshTraitIcons();
     }
 
+    public void AddTrait(RoomTrait trait)
+    {
+        if (!traits.Contains(trait))
+        {
+            traits.Add(trait);
+            RefreshTraitIcons();
+        }
+    }
+
+    public void RemoveTrait(RoomTrait trait)
+    {
+        if (traits.Remove(trait))
+            RefreshTraitIcons();
+    }
+
+    public bool IsAdjacentTo(RoomSlot other)
+    {
+        if (other == null)
+            return false;
+
+        if (floorIndex != other.floorIndex)
+            return false;
+
+        return Mathf.Abs(columnIndex - other.columnIndex) == 1;
+    }
+
     private void RefreshTraitIcons()
     {
-        if (traitIconContainer == null)
-        {
-            Debug.LogWarning($"{name}: RoomSlot traitIconContainer is not assigned.");
+        if (traitIconContainer == null || traitIconPrefab == null || traitIconDatabase == null)
             return;
-        }
-
-        if (traitIconPrefab == null)
-        {
-            Debug.LogWarning($"{name}: RoomSlot traitIconPrefab is not assigned.");
-            return;
-        }
-
-        if (traitIconDatabase == null)
-        {
-            Debug.LogWarning($"{name}: RoomSlot traitIconDatabase is not assigned.");
-            return;
-        }
 
         for (int i = traitIconContainer.childCount - 1; i >= 0; i--)
         {
             Destroy(traitIconContainer.GetChild(i).gameObject);
         }
+
+        // Elevator doesn't need trait icons unless you want them.
+        if (IsElevator)
+            return;
 
         for (int i = 0; i < traits.Count; i++)
         {
@@ -179,10 +214,6 @@ public class RoomSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
                 {
                     image.sprite = iconSprite;
                     image.enabled = iconSprite != null;
-                }
-                else
-                {
-                    Debug.LogWarning($"{iconObj.name}: spawned trait icon prefab has no TraitIconUI or Image.");
                 }
             }
         }

@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Board")]
     [SerializeField] private RoomSlot roomSlotPrefab;
+    [SerializeField] private RoomSlot elevatorSlotPrefab;
     [SerializeField] private Transform roomGridParent;
     [SerializeField] private List<RoomSlot> roomSlots = new();
 
@@ -76,6 +77,8 @@ public class GameManager : MonoBehaviour
         {
             SpawnRoomSlot(levelConfig.rooms[i]);
         }
+
+        ApplyElevatorAdjacencyTraits();
     }
 
     private void StartGame()
@@ -112,7 +115,12 @@ public class GameManager : MonoBehaviour
 
         nextCardId = 0;
 
-        int roomCount = roomSlots.Count;
+        int roomCount = 0;
+        for (int i = 0; i < roomSlots.Count; i++)
+        {
+            if (roomSlots[i].CanAcceptGuest)
+                roomCount++;
+        }
         int clampedHandSize = Mathf.Min(handManager.BaseMaxHandSize, roomCount);
 
         handManager.SetMaxHandSize(clampedHandSize);
@@ -216,7 +224,12 @@ public class GameManager : MonoBehaviour
         if (room == null || isBusy)
             return;
 
-        // Empty room click
+        if (!room.CanAcceptGuest)
+        {
+            Log("You can't place a guest in the elevator.");
+            return;
+        }
+
         if (!room.HasCard())
         {
             if (selectedCard == null)
@@ -226,13 +239,15 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Occupied room click behaves like clicking the card in that room.
         OnGuestCardLeftClicked(room.CurrentCard);
     }
 
     public void OnRoomRightClicked(RoomSlot room)
     {
         if (room == null || isBusy)
+            return;
+
+        if (!room.CanAcceptGuest)
             return;
 
         if (room.HasCard())
@@ -379,11 +394,13 @@ public class GameManager : MonoBehaviour
         UpdateDeckCountText();
         RefreshDrawButtonState();
         isBusy = false;
+
+        CheckWinState();
     }
 
     private IEnumerator MoveRoomCardToEmptyRoom(RoomSlot fromRoom, RoomSlot toRoom)
     {
-        if (fromRoom == null || toRoom == null || !fromRoom.HasCard() || toRoom.HasCard())
+        if (fromRoom == null || toRoom == null || !fromRoom.HasCard() || toRoom.HasCard() || !toRoom.CanAcceptGuest)
             yield break;
 
         GuestCard card = fromRoom.CurrentCard;
@@ -399,7 +416,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator MoveHandCardToRoom(GuestCard card, RoomSlot targetRoom)
     {
-        if (card == null || targetRoom == null)
+        if (card == null || targetRoom == null || !targetRoom.CanAcceptGuest)
             yield break;
 
         handManager.RemoveFromHand(card);
@@ -558,7 +575,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator SwapHandCardWithRoomCard(GuestCard handCard, RoomSlot room)
     {
-        if (handCard == null || room == null || room.CurrentCard == null)
+        if (handCard == null || room == null || room.CurrentCard == null || !room.CanAcceptGuest)
             yield break;
 
         GuestCard roomCard = room.CurrentCard;
@@ -585,10 +602,24 @@ public class GameManager : MonoBehaviour
 
     private void SpawnRoomSlot(LevelRoomEntry roomData)
     {
-        RoomSlot newRoom = Instantiate(roomSlotPrefab, roomGridParent);
-        newRoom.Initialize(this, roomData.roomNumber);
-        newRoom.SetTraits(roomData.traits);
-        roomSlots.Add(newRoom);
+        if (roomData == null)
+            return;
+
+        RoomSlot prefabToSpawn = roomData.slotType == SlotType.Elevator
+            ? elevatorSlotPrefab
+            : roomSlotPrefab;
+
+        if (prefabToSpawn == null)
+        {
+            Log(roomData.slotType == SlotType.Elevator
+                ? "Missing ElevatorSlot prefab."
+                : "Missing RoomSlot prefab.");
+            return;
+        }
+
+        RoomSlot newSlot = Instantiate(prefabToSpawn, roomGridParent);
+        newSlot.Initialize(this, roomData);
+        roomSlots.Add(newSlot);
     }
 
     public void RefillHand()
@@ -650,6 +681,108 @@ public class GameManager : MonoBehaviour
         card.transform.SetParent(targetParent, false);
         cardRect.anchoredPosition = Vector2.zero;
         cardRect.localScale = Vector3.one;
+    }
+
+    private void ApplyElevatorAdjacencyTraits()
+    {
+        List<RoomSlot> elevators = new List<RoomSlot>();
+
+        for (int i = 0; i < roomSlots.Count; i++)
+        {
+            if (roomSlots[i].IsElevator)
+                elevators.Add(roomSlots[i]);
+        }
+
+        for (int i = 0; i < roomSlots.Count; i++)
+        {
+            RoomSlot slot = roomSlots[i];
+
+            if (slot.IsElevator)
+                continue;
+
+            bool nearElevator = false;
+
+            for (int e = 0; e < elevators.Count; e++)
+            {
+                if (slot.IsAdjacentTo(elevators[e]))
+                {
+                    nearElevator = true;
+                    break;
+                }
+            }
+
+            if (nearElevator)
+                slot.AddTrait(RoomTrait.NearElevator);
+            else
+                slot.RemoveTrait(RoomTrait.NearElevator);
+        }
+    }
+
+    public bool AreAllPlacedGuestsCorrect()
+    {
+        bool hasAnyPlacedGuest = false;
+
+        for (int i = 0; i < roomSlots.Count; i++)
+        {
+            RoomSlot room = roomSlots[i];
+
+            if (!room.HasCard())
+                continue;
+
+            hasAnyPlacedGuest = true;
+
+            GuestCard guest = room.CurrentCard;
+            if (guest == null || !guest.IsPerfectMatch(room))
+                return false;
+        }
+
+        return hasAnyPlacedGuest;
+    }
+
+    public bool IsRoomCorrect(RoomSlot room)
+    {
+        if (room == null || !room.HasCard() || room.CurrentCard == null)
+            return false;
+
+        return room.CurrentCard.IsPerfectMatch(room);
+    }
+
+    private void CheckWinState()
+    {
+        Log($"Correct rooms: {CountCorrectlyAssignedGuests()} / {GetGuestRoomSlotCount()}");
+
+        if (AreAllPlacedGuestsCorrect())
+        {
+            Log("All guests are in correct rooms!");
+        }
+    }
+
+    public int CountCorrectlyAssignedGuests()
+    {
+        int correct = 0;
+
+        for (int i = 0; i < roomSlots.Count; i++)
+        {
+            RoomSlot room = roomSlots[i];
+
+            if (room.HasCard() && room.CurrentCard != null && room.CurrentCard.IsPerfectMatch(room))
+                correct++;
+        }
+
+        return correct;
+    }
+
+    private int GetGuestRoomSlotCount()
+    {
+        int count = 0;
+
+        for (int i = 0; i < roomSlots.Count; i++)
+        {
+            if (roomSlots[i].CanAcceptGuest)
+                count++;
+        }
+
+        return count;
     }
 
     private void Log(string message)

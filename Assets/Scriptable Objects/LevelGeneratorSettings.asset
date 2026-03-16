@@ -15,8 +15,9 @@ MonoBehaviour:
   outputFolder: Assets/Levels
   levelNamePrefix: GeneratedLevel
   floorCount: 3
-  roomsPerFloor: 3
+  roomsPerFloor: 4
   topFloorFirst: 0
+  elevatorColumnIndex: 2
   minTraitsPerRoom: 1
   maxTraitsPerRoom: 4
   minPreferencesPerGuest: 1

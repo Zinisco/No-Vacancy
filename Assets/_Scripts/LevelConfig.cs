@@ -13,6 +13,11 @@ public class LevelConfig : ScriptableObject
 public class LevelRoomEntry
 {
     public string roomNumber;
+    public SlotType slotType = SlotType.Room;
+
+    public int floorIndex;
+    public int columnIndex;
+
     public List<RoomTrait> traits = new List<RoomTrait>();
 }
 

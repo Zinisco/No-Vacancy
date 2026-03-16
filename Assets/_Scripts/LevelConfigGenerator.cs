@@ -34,6 +34,9 @@ public static class LevelConfigGenerator
                 LevelRoomEntry roomEntry = new LevelRoomEntry
                 {
                     roomNumber = room.roomNumber,
+                    slotType = room.slotType,
+                    floorIndex = room.floorIndex,
+                    columnIndex = room.columnIndex,
                     traits = new List<RoomTrait>(room.traits)
                 };
                 newLevel.rooms.Add(roomEntry);

@@ -150,6 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   guestCardPrefab: {fileID: 1234489911368371100, guid: 9ed9f7b644bbfcb44b26bca5d2fa9b1b, type: 3}
   roomSlotPrefab: {fileID: 4510929986647887564, guid: f31aba29c8724d447876046056a300bf, type: 3}
+  elevatorSlotPrefab: {fileID: 7041969639425187634, guid: 23cffcd8966e34f4c9dd239a524dd6e4, type: 3}
   roomGridParent: {fileID: 1328885069}
   roomSlots: []
   handManager: {fileID: 977239539}
@@ -1044,7 +1045,7 @@ MonoBehaviour:
   m_CellSize: {x: 160, y: 220}
   m_Spacing: {x: 100, y: 25}
   m_Constraint: 1
-  m_ConstraintCount: 3
+  m_ConstraintCount: 5
 --- !u!1 &1482011479
 GameObject:
   m_ObjectHideFlags: 0
