@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
@@ -44,12 +46,27 @@ public class GameManager : MonoBehaviour
     private int nextCardId = 0;
     private Queue<LevelGuestEntry> guestQueue = new();
     private GuestCard selectedCard;
+    private RoomSlot selectedRoomSlot;
     private bool isBusy;
 
     private void Start()
     {
         InitializeRooms();
         StartGame();
+    }
+
+    private void Update()
+    {
+        if (isBusy)
+            return;
+
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            if (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject())
+            {
+                DeselectCurrentCard();
+            }
+        }
     }
 
     private void InitializeRooms()
@@ -143,6 +160,8 @@ public class GameManager : MonoBehaviour
         if (card == null)
             return;
 
+        selectedRoomSlot = null;
+
         if (selectedCard == card)
         {
             DeselectCurrentCard();
@@ -155,6 +174,9 @@ public class GameManager : MonoBehaviour
 
         selectedCard = card;
         selectedCard.SetSelected(true);
+
+        if (TraitTooltipPanel.Instance != null)
+            TraitTooltipPanel.Instance.ShowGuest(card);
 
         string location = card.CurrentLocationType == CardLocationType.Room && card.CurrentRoom != null
             ? card.CurrentRoom.GetHolderName()
@@ -226,19 +248,27 @@ public class GameManager : MonoBehaviour
 
         if (!room.CanAcceptGuest)
         {
+            SelectRoomSlot(room);
             Log("You can't place a guest in the elevator.");
             return;
         }
 
+        // Empty room
         if (!room.HasCard())
         {
-            if (selectedCard == null)
+            // If a card is selected, use normal move/place behavior.
+            if (selectedCard != null)
+            {
+                StartCoroutine(HandleEmptyRoomInteraction(room));
                 return;
+            }
 
-            StartCoroutine(HandleEmptyRoomInteraction(room));
+            // No card selected: toggle room info selection only.
+            SelectRoomSlot(room);
             return;
         }
 
+        // Occupied room behaves like clicking the card in that room.
         OnGuestCardLeftClicked(room.CurrentCard);
     }
 
@@ -263,6 +293,33 @@ public class GameManager : MonoBehaviour
 
         bool canDraw = !isBusy && guestQueue.Count > 0 && handManager.HasSpace;
         drawButton.interactable = canDraw;
+    }
+
+    private void SelectRoomSlot(RoomSlot room)
+    {
+        if (room == null)
+            return;
+
+        if (selectedRoomSlot == room)
+        {
+            DeselectSelectedRoomSlot();
+            return;
+        }
+
+        selectedRoomSlot = room;
+
+        if (TraitTooltipPanel.Instance != null)
+            TraitTooltipPanel.Instance.ShowRoom(room);
+
+        Log($"Selected {room.GetHolderName()}");
+    }
+
+    private void DeselectSelectedRoomSlot()
+    {
+        selectedRoomSlot = null;
+
+        if (TraitTooltipPanel.Instance != null)
+            TraitTooltipPanel.Instance.Hide();
     }
 
     private IEnumerator HandleCardToCardInteraction(GuestCard firstCard, GuestCard secondCard)
@@ -633,6 +690,10 @@ public class GameManager : MonoBehaviour
             selectedCard.SetSelected(false);
 
         selectedCard = null;
+        selectedRoomSlot = null;
+
+        if (TraitTooltipPanel.Instance != null)
+            TraitTooltipPanel.Instance.Hide();
     }
 
     private void UpdateDeckCountText()

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class LevelConfigGenerator
 {
-    public static LevelConfig CreateLevelAsset(LevelGeneratorSettings settings, int maxAttempts = 100)
+    public static LevelConfig CreateLevelAsset(LevelGeneratorSettings settings, int maxAttempts = 300)
     {
         if (settings == null)
             return null;
@@ -23,7 +23,7 @@ public static class LevelConfigGenerator
             List<GeneratedRoomData> generatedRooms = LevelGenerator.GenerateRooms(settings);
             List<GeneratedGuestData> generatedGuests = LevelGenerator.GenerateGuests(settings, generatedRooms);
 
-            if (!LevelValidator.CanSolve(generatedRooms, generatedGuests))
+            if (!LevelValidator.IsInterestingPuzzle(generatedRooms, generatedGuests))
                 continue;
 
             LevelConfig newLevel = ScriptableObject.CreateInstance<LevelConfig>();

@@ -17,12 +17,12 @@ MonoBehaviour:
     slotType: 0
     floorIndex: 1
     columnIndex: 0
-    traits: 060000000300000001000000
+    traits: 060000000200000001000000
   - roomNumber: 101
     slotType: 0
     floorIndex: 1
     columnIndex: 1
-    traits: 03000000060000000100000007000000
+    traits: 0100000007000000
   - roomNumber: E1
     slotType: 1
     floorIndex: 1
@@ -32,22 +32,22 @@ MonoBehaviour:
     slotType: 0
     floorIndex: 1
     columnIndex: 3
-    traits: 06000000020000000000000007000000
+    traits: 0300000007000000
   - roomNumber: 104
     slotType: 0
     floorIndex: 1
     columnIndex: 4
-    traits: 0300000000000000
+    traits: 0100000006000000
   - roomNumber: 202
     slotType: 0
     floorIndex: 2
     columnIndex: 0
-    traits: 06000000
+    traits: 0300000006000000
   - roomNumber: 201
     slotType: 0
     floorIndex: 2
     columnIndex: 1
-    traits: 03000000000000000600000007000000
+    traits: 050000000300000007000000
   - roomNumber: E2
     slotType: 1
     floorIndex: 2
@@ -57,22 +57,22 @@ MonoBehaviour:
     slotType: 0
     floorIndex: 2
     columnIndex: 3
-    traits: 06000000020000000100000007000000
+    traits: 020000000600000007000000
   - roomNumber: 204
     slotType: 0
     floorIndex: 2
     columnIndex: 4
-    traits: 02000000
+    traits: 050000000200000000000000
   - roomNumber: 302
     slotType: 0
     floorIndex: 3
     columnIndex: 0
-    traits: 05000000
+    traits: 00000000
   - roomNumber: 301
     slotType: 0
     floorIndex: 3
     columnIndex: 1
-    traits: 030000000500000007000000
+    traits: 060000000100000007000000
   - roomNumber: E3
     slotType: 1
     floorIndex: 3
@@ -82,34 +82,34 @@ MonoBehaviour:
     slotType: 0
     floorIndex: 3
     columnIndex: 3
-    traits: 0200000007000000
+    traits: 01000000030000000600000007000000
   - roomNumber: 304
     slotType: 0
     floorIndex: 3
     columnIndex: 4
-    traits: 01000000
+    traits: 0100000003000000
   guests:
   - guestName: Avery
-    preferredTraits: 0100000006000000
-  - guestName: Quinn
-    preferredTraits: 07000000
-  - guestName: Elliot
-    preferredTraits: 0000000006000000
-  - guestName: Skyler
-    preferredTraits: 0300000000000000
-  - guestName: Charlie
-    preferredTraits: 06000000
-  - guestName: Rowan
-    preferredTraits: 03000000
-  - guestName: Jordan
-    preferredTraits: 070000000200000001000000
-  - guestName: Taylor
-    preferredTraits: 02000000
-  - guestName: Hayden
-    preferredTraits: 05000000
-  - guestName: Dakota
-    preferredTraits: 0300000007000000
+    preferredTraits: 0200000001000000
   - guestName: Logan
-    preferredTraits: 02000000
-  - guestName: Alex
     preferredTraits: 01000000
+  - guestName: Morgan
+    preferredTraits: 0300000007000000
+  - guestName: Rowan
+    preferredTraits: 0600000001000000
+  - guestName: Taylor
+    preferredTraits: 0300000006000000
+  - guestName: Sam
+    preferredTraits: 030000000700000005000000
+  - guestName: Elliot
+    preferredTraits: 07000000
+  - guestName: Quinn
+    preferredTraits: 0500000000000000
+  - guestName: Dakota
+    preferredTraits: 00000000
+  - guestName: Skyler
+    preferredTraits: 060000000100000007000000
+  - guestName: Alex
+    preferredTraits: 030000000100000006000000
+  - guestName: Chris
+    preferredTraits: 0300000001000000
