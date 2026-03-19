@@ -10,6 +10,7 @@ public class TraitTooltipPanel : MonoBehaviour
     [SerializeField] private GameObject root;
     [SerializeField] private TMP_Text titleText;
     [SerializeField] private TMP_Text subtitleText;
+    [SerializeField] private TMP_Text floorPreferenceText;
 
     [Header("Content")]
     [SerializeField] private Transform rowContainer;
@@ -38,7 +39,7 @@ public class TraitTooltipPanel : MonoBehaviour
         string title = room.IsElevator ? room.RoomNumber : $"Room {room.RoomNumber}";
         string subtitle = room.IsElevator ? "Elevator" : "Room Traits";
 
-        Show(title, subtitle, room.Traits);
+        ShowRoomContent(title, subtitle, room.Traits);
     }
 
     public void ShowGuest(GuestCard guest)
@@ -46,10 +47,49 @@ public class TraitTooltipPanel : MonoBehaviour
         if (guest == null)
             return;
 
-        Show(guest.DisplayName, "Guest Preferences", guest.PreferredTraits);
+        ShowGuestContent(
+            guest.DisplayName,
+            "Guest Preferences",
+            guest.PreferredTraits,
+            guest.PreferredFloorPreferences
+        );
     }
 
-    public void Show(string title, string subtitle, IReadOnlyList<RoomTrait> traits)
+    private void ShowRoomContent(string title, string subtitle, IReadOnlyList<RoomTrait> traits)
+    {
+        ShowRoot(title, subtitle);
+        ClearRows();
+        ClearFloorPreferenceText();
+
+        if (traits == null || traits.Count == 0)
+            return;
+
+        for (int i = 0; i < traits.Count; i++)
+        {
+            AddTraitRow(traits[i]);
+        }
+    }
+
+    private void ShowGuestContent(
+        string title,
+        string subtitle,
+        IReadOnlyList<RoomTrait> traits,
+        IReadOnlyList<FloorPreference> floorPreferences)
+    {
+        ShowRoot(title, subtitle);
+        ClearRows();
+        SetFloorPreferenceText(floorPreferences);
+
+        if (traits == null || traits.Count == 0)
+            return;
+
+        for (int i = 0; i < traits.Count; i++)
+        {
+            AddTraitRow(traits[i]);
+        }
+    }
+
+    private void ShowRoot(string title, string subtitle)
     {
         if (root != null)
             root.SetActive(true);
@@ -59,22 +99,46 @@ public class TraitTooltipPanel : MonoBehaviour
 
         if (subtitleText != null)
             subtitleText.text = subtitle;
+    }
 
-        ClearRows();
+    private void AddTraitRow(RoomTrait trait)
+    {
+        TooltipTraitRowUI row = Instantiate(rowPrefab, rowContainer);
+        Sprite icon = traitIconDatabase != null ? traitIconDatabase.GetIcon(trait) : null;
+        string label = RoomTraitUtility.GetDisplayName(trait);
+        row.SetData(icon, label);
+    }
 
-        if (traits == null || traits.Count == 0)
+    private void SetFloorPreferenceText(IReadOnlyList<FloorPreference> floorPreferences)
+    {
+        if (floorPreferenceText == null)
             return;
 
-        for (int i = 0; i < traits.Count; i++)
+        if (floorPreferences == null || floorPreferences.Count == 0)
         {
-            RoomTrait trait = traits[i];
-            TooltipTraitRowUI row = Instantiate(rowPrefab, rowContainer);
-
-            Sprite icon = traitIconDatabase != null ? traitIconDatabase.GetIcon(trait) : null;
-            string label = RoomTraitUtility.GetDisplayName(trait);
-
-            row.SetData(icon, label);
+            floorPreferenceText.text = "";
+            floorPreferenceText.gameObject.SetActive(false);
+            return;
         }
+
+        List<string> labels = new List<string>();
+
+        for (int i = 0; i < floorPreferences.Count; i++)
+        {
+            labels.Add(FloorPreferenceUtility.GetDisplayName(floorPreferences[i]));
+        }
+
+        floorPreferenceText.text = string.Join(", ", labels);
+        floorPreferenceText.gameObject.SetActive(true);
+    }
+
+    private void ClearFloorPreferenceText()
+    {
+        if (floorPreferenceText == null)
+            return;
+
+        floorPreferenceText.text = "";
+        floorPreferenceText.gameObject.SetActive(false);
     }
 
     public void Hide()
@@ -83,6 +147,7 @@ public class TraitTooltipPanel : MonoBehaviour
             root.SetActive(false);
 
         ClearRows();
+        ClearFloorPreferenceText();
     }
 
     private void ClearRows()

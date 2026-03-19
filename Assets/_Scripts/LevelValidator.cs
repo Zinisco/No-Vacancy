@@ -13,6 +13,8 @@ public static class LevelValidator
         if (guests.Count > rooms.Count)
             return false;
 
+        int topFloor = GetTopFloorIndex(rooms);
+
         for (int i = 0; i < rooms.Count; i++)
         {
             if (RoomTraitRules.HasAnyConflict(rooms[i].traits))
@@ -27,7 +29,7 @@ public static class LevelValidator
 
         for (int i = 0; i < guests.Count; i++)
         {
-            if (CountMatchingRoomsForGuest(rooms, guests[i]) == 0)
+            if (CountMatchingRoomsForGuest(rooms, guests[i], topFloor) == 0)
                 return false;
         }
 
@@ -50,12 +52,13 @@ public static class LevelValidator
             return false;
 
         List<GeneratedRoomData> rooms = GetRoomSlots(slots);
+        int topFloor = GetTopFloorIndex(rooms);
 
         int ambiguousGuests = 0;
 
         for (int i = 0; i < guests.Count; i++)
         {
-            int matches = CountMatchingRoomsForGuest(rooms, guests[i]);
+            int matches = CountMatchingRoomsForGuest(rooms, guests[i], topFloor);
 
             if (matches == 0)
                 return false;
@@ -77,6 +80,15 @@ public static class LevelValidator
         if (slots == null || guest == null)
             return 0;
 
+        int topFloor = GetTopFloorIndex(slots);
+        return CountMatchingRoomsForGuest(slots, guest, topFloor);
+    }
+
+    private static int CountMatchingRoomsForGuest(List<GeneratedRoomData> slots, GeneratedGuestData guest, int topFloor)
+    {
+        if (slots == null || guest == null)
+            return 0;
+
         int count = 0;
 
         for (int i = 0; i < slots.Count; i++)
@@ -84,7 +96,7 @@ public static class LevelValidator
             if (slots[i].slotType != SlotType.Room)
                 continue;
 
-            if (RoomMatchesGuest(slots[i], guest))
+            if (RoomMatchesGuest(slots[i], guest, topFloor))
                 count++;
         }
 
@@ -94,9 +106,10 @@ public static class LevelValidator
     private static int CountSolutions(List<GeneratedRoomData> rooms, List<GeneratedGuestData> guests, int stopAfter)
     {
         bool[] usedRooms = new bool[rooms.Count];
-        List<int> guestOrder = BuildMostConstrainedGuestOrder(rooms, guests);
+        int topFloor = GetTopFloorIndex(rooms);
+        List<int> guestOrder = BuildMostConstrainedGuestOrder(rooms, guests, topFloor);
 
-        return CountSolutionsRecursive(rooms, guests, guestOrder, 0, usedRooms, stopAfter);
+        return CountSolutionsRecursive(rooms, guests, guestOrder, 0, usedRooms, stopAfter, topFloor);
     }
 
     private static int CountSolutionsRecursive(
@@ -105,7 +118,8 @@ public static class LevelValidator
         List<int> guestOrder,
         int guestDepth,
         bool[] usedRooms,
-        int stopAfter)
+        int stopAfter,
+        int topFloor)
     {
         if (guestDepth >= guestOrder.Count)
             return 1;
@@ -120,7 +134,7 @@ public static class LevelValidator
             if (usedRooms[roomIndex])
                 continue;
 
-            if (!RoomMatchesGuest(rooms[roomIndex], guest))
+            if (!RoomMatchesGuest(rooms[roomIndex], guest, topFloor))
                 continue;
 
             usedRooms[roomIndex] = true;
@@ -131,7 +145,8 @@ public static class LevelValidator
                 guestOrder,
                 guestDepth + 1,
                 usedRooms,
-                stopAfter
+                stopAfter,
+                topFloor
             );
 
             usedRooms[roomIndex] = false;
@@ -143,7 +158,7 @@ public static class LevelValidator
         return totalSolutions;
     }
 
-    private static List<int> BuildMostConstrainedGuestOrder(List<GeneratedRoomData> rooms, List<GeneratedGuestData> guests)
+    private static List<int> BuildMostConstrainedGuestOrder(List<GeneratedRoomData> rooms, List<GeneratedGuestData> guests, int topFloor)
     {
         List<int> indices = new List<int>();
 
@@ -152,8 +167,8 @@ public static class LevelValidator
 
         indices.Sort((a, b) =>
         {
-            int countA = CountMatchingRoomsForGuest(rooms, guests[a]);
-            int countB = CountMatchingRoomsForGuest(rooms, guests[b]);
+            int countA = CountMatchingRoomsForGuest(rooms, guests[a], topFloor);
+            int countB = CountMatchingRoomsForGuest(rooms, guests[b], topFloor);
 
             return countA.CompareTo(countB);
         });
@@ -174,7 +189,7 @@ public static class LevelValidator
         return rooms;
     }
 
-    private static bool RoomMatchesGuest(GeneratedRoomData room, GeneratedGuestData guest)
+    private static bool RoomMatchesGuest(GeneratedRoomData room, GeneratedGuestData guest, int topFloor)
     {
         for (int i = 0; i < guest.preferredTraits.Count; i++)
         {
@@ -182,6 +197,43 @@ public static class LevelValidator
                 return false;
         }
 
+        for (int i = 0; i < guest.preferredFloorPreferences.Count; i++)
+        {
+            if (!RoomMatchesFloorPreference(room, guest.preferredFloorPreferences[i], topFloor))
+                return false;
+        }
+
         return true;
+    }
+
+    private static bool RoomMatchesFloorPreference(GeneratedRoomData room, FloorPreference preference, int topFloor)
+    {
+        switch (preference)
+        {
+            case FloorPreference.FirstFloor:
+                return room.floorIndex == 1;
+
+            case FloorPreference.SecondFloor:
+                return room.floorIndex == 2;
+
+            case FloorPreference.TopFloor:
+                return room.floorIndex == topFloor;
+
+            default:
+                return false;
+        }
+    }
+
+    private static int GetTopFloorIndex(List<GeneratedRoomData> rooms)
+    {
+        int topFloor = 1;
+
+        for (int i = 0; i < rooms.Count; i++)
+        {
+            if (rooms[i].floorIndex > topFloor)
+                topFloor = rooms[i].floorIndex;
+        }
+
+        return topFloor;
     }
 }

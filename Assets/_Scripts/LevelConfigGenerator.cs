@@ -48,7 +48,8 @@ public static class LevelConfigGenerator
                 LevelGuestEntry guestEntry = new LevelGuestEntry
                 {
                     guestName = guest.guestName,
-                    preferredTraits = new List<RoomTrait>(guest.preferredTraits)
+                    preferredTraits = new List<RoomTrait>(guest.preferredTraits),
+                    preferredFloorPreferences = new List<FloorPreference>(guest.preferredFloorPreferences)
                 };
                 newLevel.guests.Add(guestEntry);
             }

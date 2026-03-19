@@ -513,6 +513,7 @@ public class GameManager : MonoBehaviour
 
             newCard.Initialize(cardId, guestName, this);
             newCard.SetPreferredTraits(preferredTraitsToUse);
+            newCard.SetPreferredFloorPreferences(guestData.preferredFloorPreferences);
 
             if (newCardRect != null && drawSpawnPoint != null)
             {
@@ -844,6 +845,19 @@ public class GameManager : MonoBehaviour
         }
 
         return count;
+    }
+
+    public int GetTopFloorIndex()
+    {
+        int topFloor = 1;
+
+        for (int i = 0; i < roomSlots.Count; i++)
+        {
+            if (roomSlots[i].CanAcceptGuest && roomSlots[i].FloorIndex > topFloor)
+                topFloor = roomSlots[i].FloorIndex;
+        }
+
+        return topFloor;
     }
 
     private void Log(string message)

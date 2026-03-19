@@ -181,6 +181,24 @@ public class RoomSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
         return Mathf.Abs(columnIndex - other.columnIndex) == 1;
     }
 
+    public bool MatchesFloorPreference(FloorPreference preference, int topFloor)
+    {
+        switch (preference)
+        {
+            case FloorPreference.FirstFloor:
+                return floorIndex == 1;
+
+            case FloorPreference.SecondFloor:
+                return floorIndex == 2;
+
+            case FloorPreference.TopFloor:
+                return floorIndex == topFloor;
+
+            default:
+                return false;
+        }
+    }
+
     private void RefreshTraitIcons()
     {
         if (traitIconContainer == null || traitIconPrefab == null || traitIconDatabase == null)

@@ -9,9 +9,13 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     [Header("UI")]
     [SerializeField] private TMP_Text nameText;
     [SerializeField] private Button button;
+    [SerializeField] private TMP_Text floorPreferenceText;
 
     [SerializeField] private List<RoomTrait> preferredTraits = new List<RoomTrait>();
     public IReadOnlyList<RoomTrait> PreferredTraits => preferredTraits;
+
+    [SerializeField] private List<FloorPreference> preferredFloorPreferences = new List<FloorPreference>();
+    public IReadOnlyList<FloorPreference> PreferredFloorPreferences => preferredFloorPreferences;
 
     [Header("Trait Icons")]
     [SerializeField] private RoomTraitIconDatabase traitIconDatabase;
@@ -271,6 +275,14 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
                 return false;
         }
 
+        int topFloor = gameManager != null ? gameManager.GetTopFloorIndex() : 1;
+
+        for (int i = 0; i < preferredFloorPreferences.Count; i++)
+        {
+            if (!room.MatchesFloorPreference(preferredFloorPreferences[i], topFloor))
+                return false;
+        }
+
         return true;
     }
 
@@ -282,6 +294,16 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
             preferredTraits.AddRange(newTraits);
 
         RefreshTraitIcons();
+    }
+
+    public void SetPreferredFloorPreferences(List<FloorPreference> newPreferences)
+    {
+        preferredFloorPreferences.Clear();
+
+        if (newPreferences != null)
+            preferredFloorPreferences.AddRange(newPreferences);
+
+        RefreshFloorPreferenceText();
     }
 
     private void RefreshTraitIcons()
@@ -335,5 +357,26 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
                 }
             }
         }
+    }
+
+    private void RefreshFloorPreferenceText()
+    {
+        if (floorPreferenceText == null)
+            return;
+
+        if (preferredFloorPreferences == null || preferredFloorPreferences.Count == 0)
+        {
+            floorPreferenceText.text = "";
+            return;
+        }
+
+        List<string> labels = new List<string>();
+
+        for (int i = 0; i < preferredFloorPreferences.Count; i++)
+        {
+            labels.Add(FloorPreferenceUtility.GetDisplayName(preferredFloorPreferences[i]));
+        }
+
+        floorPreferenceText.text = string.Join(", ", labels);
     }
 }

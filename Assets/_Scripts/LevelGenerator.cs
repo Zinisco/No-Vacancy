@@ -230,7 +230,8 @@ public static class LevelGenerator
             GeneratedGuestData guest = new GeneratedGuestData
             {
                 guestName = i < shuffledNames.Count ? shuffledNames[i] : $"Guest {i + 1}",
-                preferredTraits = GenerateGuestPreferencesFromRoom(settings, sourceRoom)
+                preferredTraits = GenerateGuestPreferencesFromRoom(settings, sourceRoom),
+                preferredFloorPreferences = GenerateGuestFloorPreferences(settings, sourceRoom, actualRooms)
             };
 
             guests.Add(guest);
@@ -269,6 +270,44 @@ public static class LevelGenerator
             prefs.Add(shuffled[0]);
 
         return prefs;
+    }
+
+    private static List<FloorPreference> GenerateGuestFloorPreferences(
+    LevelGeneratorSettings settings,
+    GeneratedRoomData sourceRoom,
+    List<GeneratedRoomData> allRooms)
+    {
+        List<FloorPreference> result = new();
+
+        if (sourceRoom == null || allRooms == null || allRooms.Count == 0)
+            return result;
+
+        int topFloor = 1;
+        for (int i = 0; i < allRooms.Count; i++)
+        {
+            if (allRooms[i].floorIndex > topFloor)
+                topFloor = allRooms[i].floorIndex;
+        }
+
+        List<FloorPreference> possible = new();
+
+        if (sourceRoom.floorIndex == 1)
+            possible.Add(FloorPreference.FirstFloor);
+
+        if (sourceRoom.floorIndex == 2)
+            possible.Add(FloorPreference.SecondFloor);
+
+        if (sourceRoom.floorIndex == topFloor)
+            possible.Add(FloorPreference.TopFloor);
+
+        // Optional: randomly give 0 or 1 floor preferences.
+        if (possible.Count > 0 && Random.value < 0.5f)
+        {
+            int pick = Random.Range(0, possible.Count);
+            result.Add(possible[pick]);
+        }
+
+        return result;
     }
 
     private static void Shuffle<T>(List<T> list)
