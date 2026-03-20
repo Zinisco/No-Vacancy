@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
@@ -20,27 +18,30 @@ public class GameManager : MonoBehaviour
     [Header("Managers")]
     [SerializeField] private HandManager handManager;
     [SerializeField] private CardAnimationController cardAnimationController;
+    [SerializeField] private GameUIController gameUIController;
 
     [Header("Level Data")]
     [SerializeField] private LevelConfig levelConfig;
 
-    [Header("UI")]
-    [SerializeField] private TMP_Text debugText;
-    [SerializeField] private TMP_Text deckCountText;
-    [SerializeField] private Button drawButton;
-
     [Header("Draw Settings")]
     [SerializeField] private int startingDrawAmount = 5;
     [SerializeField] private int drawAmountPerRefill = 3;
+    [SerializeField] private float drawStaggerDelay = 0.03f;
 
     private int nextCardId = 0;
     private Queue<LevelGuestEntry> guestQueue = new();
+
     private GuestCard selectedCard;
     private RoomSlot selectedRoomSlot;
     private bool isBusy;
 
+    #region Unity Lifecycle
+
     private void Start()
     {
+        if (!ValidateReferences())
+            return;
+
         InitializeRooms();
         StartGame();
     }
@@ -54,26 +55,47 @@ public class GameManager : MonoBehaviour
         {
             if (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject())
             {
-                DeselectCurrentCard();
+                DeselectCurrentSelection();
             }
         }
     }
 
-    private void InitializeRooms()
-    {
-        roomSlots.Clear();
+    #endregion
 
-        if (roomSlotPrefab == null || roomGridParent == null)
+    #region Setup
+
+    private bool ValidateReferences()
+    {
+        if (handManager == null)
         {
-            Log("Missing RoomSlot prefab or RoomGrid parent.");
-            return;
+            Log("Missing HandManager.");
+            return false;
+        }
+
+        if (cardAnimationController == null)
+        {
+            Log("Missing CardAnimationController.");
+            return false;
         }
 
         if (levelConfig == null)
         {
             Log("Missing LevelConfig.");
-            return;
+            return false;
         }
+
+        if (roomSlotPrefab == null || roomGridParent == null)
+        {
+            Log("Missing RoomSlot prefab or RoomGrid parent.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void InitializeRooms()
+    {
+        roomSlots.Clear();
 
         for (int i = roomGridParent.childCount - 1; i >= 0; i--)
         {
@@ -90,18 +112,6 @@ public class GameManager : MonoBehaviour
 
     private void StartGame()
     {
-        if (handManager == null)
-        {
-            Log("Missing HandManager.");
-            return;
-        }
-
-        if (levelConfig == null)
-        {
-            Log("Missing LevelConfig.");
-            return;
-        }
-
         if (levelConfig.rooms.Count == 0)
         {
             Log("LevelConfig has no rooms.");
@@ -122,12 +132,7 @@ public class GameManager : MonoBehaviour
 
         nextCardId = 0;
 
-        int roomCount = 0;
-        for (int i = 0; i < roomSlots.Count; i++)
-        {
-            if (roomSlots[i].CanAcceptGuest)
-                roomCount++;
-        }
+        int roomCount = GetGuestRoomSlotCount();
         int clampedHandSize = Mathf.Min(handManager.BaseMaxHandSize, roomCount);
 
         handManager.SetMaxHandSize(clampedHandSize);
@@ -137,6 +142,32 @@ public class GameManager : MonoBehaviour
         Log($"Game started. Rooms: {roomCount}, Hand Size: {clampedHandSize}");
     }
 
+    private void SpawnRoomSlot(LevelRoomEntry roomData)
+    {
+        if (roomData == null)
+            return;
+
+        RoomSlot prefabToSpawn = roomData.slotType == SlotType.Elevator
+            ? elevatorSlotPrefab
+            : roomSlotPrefab;
+
+        if (prefabToSpawn == null)
+        {
+            Log(roomData.slotType == SlotType.Elevator
+                ? "Missing ElevatorSlot prefab."
+                : "Missing RoomSlot prefab.");
+            return;
+        }
+
+        RoomSlot newSlot = Instantiate(prefabToSpawn, roomGridParent);
+        newSlot.Initialize(this, roomData);
+        roomSlots.Add(newSlot);
+    }
+
+    #endregion
+
+    #region Public Input Entry Points
+
     public void DrawCards(int amount)
     {
         if (isBusy)
@@ -145,46 +176,9 @@ public class GameManager : MonoBehaviour
         StartCoroutine(DrawCardsRoutine(amount));
     }
 
-    public void SelectCard(GuestCard card)
+    public void RefillHand()
     {
-        if (card == null)
-            return;
-
-        selectedRoomSlot = null;
-
-        if (selectedCard == card)
-        {
-            DeselectCurrentCard();
-            Log($"Deselected {card.DisplayName}");
-            return;
-        }
-
-        if (selectedCard != null)
-            selectedCard.SetSelected(false);
-
-        selectedCard = card;
-        selectedCard.SetSelected(true);
-
-        if (TraitTooltipPanel.Instance != null)
-            TraitTooltipPanel.Instance.ShowGuest(card);
-
-        string location = card.CurrentLocationType == CardLocationType.Room && card.CurrentRoom != null
-            ? card.CurrentRoom.GetHolderName()
-            : "Hand";
-
-        Log($"Selected {card.DisplayName} from {location}");
-    }
-
-    public void OnGuestCardRightClicked(GuestCard card)
-    {
-        if (card == null || isBusy)
-            return;
-
-        // Only room cards can be sent back to hand with right click.
-        if (card.CurrentLocationType == CardLocationType.Room && card.CurrentRoom != null)
-        {
-            StartCoroutine(ReturnRoomCardToHand(card.CurrentRoom));
-        }
+        DrawCards(drawAmountPerRefill);
     }
 
     public void OnDrawButtonPressed()
@@ -213,22 +207,30 @@ public class GameManager : MonoBehaviour
         if (card == null || isBusy)
             return;
 
-        // Left click always selects, regardless of hand or room.
         if (selectedCard == null)
         {
             SelectCard(card);
             return;
         }
 
-        // Clicking the same selected card deselects it.
         if (selectedCard == card)
         {
-            DeselectCurrentCard();
+            DeselectCurrentSelection();
             return;
         }
 
-        // If a card is already selected, try to resolve interaction.
         StartCoroutine(HandleCardToCardInteraction(selectedCard, card));
+    }
+
+    public void OnGuestCardRightClicked(GuestCard card)
+    {
+        if (card == null || isBusy)
+            return;
+
+        if (card.CurrentLocationType == CardLocationType.Room && card.CurrentRoom != null)
+        {
+            StartCoroutine(ReturnRoomCardToHand(card.CurrentRoom));
+        }
     }
 
     public void OnRoomLeftClicked(RoomSlot room)
@@ -243,22 +245,18 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Empty room
         if (!room.HasCard())
         {
-            // If a card is selected, use normal move/place behavior.
             if (selectedCard != null)
             {
                 StartCoroutine(HandleEmptyRoomInteraction(room));
                 return;
             }
 
-            // No card selected: toggle room info selection only.
             SelectRoomSlot(room);
             return;
         }
 
-        // Occupied room behaves like clicking the card in that room.
         OnGuestCardLeftClicked(room.CurrentCard);
     }
 
@@ -276,13 +274,37 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void RefreshDrawButtonState()
+    #endregion
+
+    #region Selection
+
+    public void SelectCard(GuestCard card)
     {
-        if (drawButton == null || handManager == null)
+        if (card == null)
             return;
 
-        bool canDraw = !isBusy && guestQueue.Count > 0 && handManager.HasSpace;
-        drawButton.interactable = canDraw;
+        selectedRoomSlot = null;
+
+        if (selectedCard == card)
+        {
+            DeselectCurrentSelection();
+            Log($"Deselected {card.DisplayName}");
+            return;
+        }
+
+        if (selectedCard != null)
+            selectedCard.SetSelected(false);
+
+        selectedCard = card;
+        selectedCard.SetSelected(true);
+
+        gameUIController?.ShowGuestTooltip(card);
+
+        string location = card.CurrentLocationType == CardLocationType.Room && card.CurrentRoom != null
+            ? card.CurrentRoom.GetHolderName()
+            : "Hand";
+
+        Log($"Selected {card.DisplayName} from {location}");
     }
 
     private void SelectRoomSlot(RoomSlot room)
@@ -296,21 +318,125 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        if (selectedCard != null)
+            selectedCard.SetSelected(false);
+
+        selectedCard = null;
         selectedRoomSlot = room;
 
-        if (TraitTooltipPanel.Instance != null)
-            TraitTooltipPanel.Instance.ShowRoom(room);
-
+        gameUIController?.ShowRoomTooltip(room);
         Log($"Selected {room.GetHolderName()}");
+    }
+
+    private void DeselectCurrentSelection()
+    {
+        if (selectedCard != null)
+            selectedCard.SetSelected(false);
+
+        selectedCard = null;
+        selectedRoomSlot = null;
+
+        gameUIController?.HideTooltip();
     }
 
     private void DeselectSelectedRoomSlot()
     {
         selectedRoomSlot = null;
-
-        if (TraitTooltipPanel.Instance != null)
-            TraitTooltipPanel.Instance.Hide();
+        gameUIController?.HideTooltip();
     }
+
+    #endregion
+
+    #region Draw / Hand Flow
+
+    private IEnumerator DrawCardsRoutine(int amount)
+    {
+        if (guestCardPrefab == null || handManager == null)
+            yield break;
+
+        isBusy = true;
+        RefreshDrawButtonState();
+
+        int drawsRemaining = amount;
+
+        while (drawsRemaining > 0 && handManager.HasSpace && guestQueue.Count > 0)
+        {
+            LevelGuestEntry guestData = guestQueue.Dequeue();
+            GuestCard newCard = CreateGuestCardFromData(guestData);
+
+            handManager.AddToHand(newCard, false);
+            handManager.RefreshHandLayout();
+            Canvas.ForceUpdateCanvases();
+            newCard.SnapToCurrentHandPose();
+
+            yield return StartCoroutine(cardAnimationController.AnimateDrawCardToHand(newCard));
+
+            drawsRemaining--;
+
+            if (drawsRemaining > 0)
+                yield return new WaitForSeconds(drawStaggerDelay);
+        }
+
+        UpdateDeckCountText();
+        isBusy = false;
+        RefreshDrawButtonState();
+    }
+
+    private GuestCard CreateGuestCardFromData(LevelGuestEntry guestData)
+    {
+        string guestName = guestData.guestName;
+        string cardId = $"CARD_{++nextCardId:D3}";
+
+        RectTransform handParent = handManager.GetHandContainer() as RectTransform;
+        GuestCard newCard = Instantiate(guestCardPrefab, handParent);
+
+        newCard.Initialize(cardId, guestName, this);
+        newCard.SetPreferredTraits(guestData.preferredTraits);
+        newCard.SetPreferredFloorPreferences(guestData.preferredFloorPreferences);
+
+        return newCard;
+    }
+
+    private IEnumerator ReturnRoomCardToHand(RoomSlot room)
+    {
+        if (room == null || !room.HasCard())
+            yield break;
+
+        if (!handManager.HasSpace)
+        {
+            Log("Hand is full.");
+            yield break;
+        }
+
+        GuestCard roomCard = room.CurrentCard;
+        room.ClearCard();
+        roomCard.SetSelected(false);
+
+        yield return StartCoroutine(AddRoomCardBackToHand(roomCard));
+
+        UpdateDeckCountText();
+        RefreshDrawButtonState();
+        Log($"Returned {roomCard.DisplayName} to hand.");
+    }
+
+    private IEnumerator AddRoomCardBackToHand(GuestCard card)
+    {
+        if (card == null)
+            yield break;
+
+        RectTransform handParent = handManager.GetHandContainer() as RectTransform;
+        card.transform.SetParent(handParent, true);
+
+        handManager.AddToHand(card, false);
+        handManager.RefreshHandLayout();
+        Canvas.ForceUpdateCanvases();
+
+        yield return StartCoroutine(cardAnimationController.AnimateCardToHandPose(card));
+    }
+
+    #endregion
+
+    #region Card Interactions
 
     private IEnumerator HandleCardToCardInteraction(GuestCard firstCard, GuestCard secondCard)
     {
@@ -320,7 +446,6 @@ public class GameManager : MonoBehaviour
         isBusy = true;
         RefreshDrawButtonState();
 
-        // Hand <-> Hand: just switch selection to the second card
         if (firstCard.CurrentLocationType == CardLocationType.Hand &&
             secondCard.CurrentLocationType == CardLocationType.Hand)
         {
@@ -330,7 +455,6 @@ public class GameManager : MonoBehaviour
             yield break;
         }
 
-        // Hand <-> Room
         if (firstCard.CurrentLocationType == CardLocationType.Hand &&
             secondCard.CurrentLocationType == CardLocationType.Room &&
             secondCard.CurrentRoom != null)
@@ -341,14 +465,10 @@ public class GameManager : MonoBehaviour
             yield return StartCoroutine(SwapHandCardWithRoomCard(firstCard, secondCard.CurrentRoom));
             Log($"Swapped {handCardName} with {roomCardName}");
 
-            DeselectCurrentCard();
-            UpdateDeckCountText();
-            RefreshDrawButtonState();
-            isBusy = false;
+            FinishInteraction();
             yield break;
         }
 
-        // Room <-> Hand
         if (firstCard.CurrentLocationType == CardLocationType.Room &&
             firstCard.CurrentRoom != null &&
             secondCard.CurrentLocationType == CardLocationType.Hand)
@@ -359,14 +479,10 @@ public class GameManager : MonoBehaviour
             yield return StartCoroutine(SwapHandCardWithRoomCard(secondCard, firstCard.CurrentRoom));
             Log($"Swapped {handCardName} with {roomCardName}");
 
-            DeselectCurrentCard();
-            UpdateDeckCountText();
-            RefreshDrawButtonState();
-            isBusy = false;
+            FinishInteraction();
             yield break;
         }
 
-        // Room <-> Room
         if (firstCard.CurrentLocationType == CardLocationType.Room &&
             secondCard.CurrentLocationType == CardLocationType.Room &&
             firstCard.CurrentRoom != null &&
@@ -379,17 +495,32 @@ public class GameManager : MonoBehaviour
             yield return StartCoroutine(SwapRoomCards(firstCard.CurrentRoom, secondCard.CurrentRoom));
             Log($"Swapped {firstName} with {secondName}");
 
-            DeselectCurrentCard();
-            UpdateDeckCountText();
-            RefreshDrawButtonState();
-            isBusy = false;
+            FinishInteraction();
             yield break;
         }
 
-        // Fallback: just select the new card
         SelectCard(secondCard);
         isBusy = false;
         RefreshDrawButtonState();
+    }
+
+    private IEnumerator SwapHandCardWithRoomCard(GuestCard handCard, RoomSlot room)
+    {
+        if (handCard == null || room == null || room.CurrentCard == null || !room.CanAcceptGuest)
+            yield break;
+
+        GuestCard roomCard = room.CurrentCard;
+
+        handManager.RemoveFromHand(handCard);
+        room.ClearCard();
+
+        handCard.SetSelected(false);
+        roomCard.SetSelected(false);
+
+        yield return StartCoroutine(cardAnimationController.AnimateCardToTarget(handCard, room.GetCardAnchor()));
+        AssignCardToRoom(handCard, room);
+
+        yield return StartCoroutine(AddRoomCardBackToHand(roomCard));
     }
 
     private IEnumerator SwapRoomCards(RoomSlot roomA, RoomSlot roomB)
@@ -437,12 +568,22 @@ public class GameManager : MonoBehaviour
             Log($"Moved {cardName} to {room.GetHolderName()}");
         }
 
-        DeselectCurrentCard();
-        UpdateDeckCountText();
-        RefreshDrawButtonState();
-        isBusy = false;
-
+        FinishInteraction();
         CheckWinState();
+    }
+
+    private IEnumerator MoveHandCardToRoom(GuestCard card, RoomSlot targetRoom)
+    {
+        if (card == null || targetRoom == null || !targetRoom.CanAcceptGuest)
+            yield break;
+
+        handManager.RemoveFromHand(card);
+        card.SetSelected(false);
+
+        yield return StartCoroutine(cardAnimationController.AnimateCardToTarget(card, targetRoom.GetCardAnchor()));
+
+        targetRoom.SetCard(card);
+        card.SetInRoom(targetRoom);
     }
 
     private IEnumerator MoveRoomCardToEmptyRoom(RoomSlot fromRoom, RoomSlot toRoom)
@@ -461,167 +602,23 @@ public class GameManager : MonoBehaviour
         card.SetInRoom(toRoom);
     }
 
-    private IEnumerator MoveHandCardToRoom(GuestCard card, RoomSlot targetRoom)
-    {
-        if (card == null || targetRoom == null || !targetRoom.CanAcceptGuest)
-            yield break;
-
-        handManager.RemoveFromHand(card);
-        card.SetSelected(false);
-
-        yield return StartCoroutine(cardAnimationController.AnimateCardToTarget(card, targetRoom.GetCardAnchor()));
-
-        targetRoom.SetCard(card);
-        card.SetInRoom(targetRoom);
-    }
-
-    private IEnumerator DrawCardsRoutine(int amount)
-    {
-        if (guestCardPrefab == null || handManager == null)
-            yield break;
-
-        isBusy = true;
-        RefreshDrawButtonState();
-
-        int drawsRemaining = amount;
-
-        while (drawsRemaining > 0 && handManager.HasSpace && guestQueue.Count > 0)
-        {
-            LevelGuestEntry guestData = guestQueue.Dequeue();
-
-            string guestName = guestData.guestName;
-            List<RoomTrait> preferredTraitsToUse = guestData.preferredTraits;
-            nextCardId++;
-            string cardId = $"CARD_{nextCardId:D3}";
-
-            RectTransform handParent = handManager.GetHandContainer() as RectTransform;
-            GuestCard newCard = Instantiate(guestCardPrefab, handParent);
-            RectTransform newCardRect = newCard.transform as RectTransform;
-
-            newCard.Initialize(cardId, guestName, this);
-            newCard.SetPreferredTraits(preferredTraitsToUse);
-            newCard.SetPreferredFloorPreferences(guestData.preferredFloorPreferences);
-            
-            handManager.AddToHand(newCard, false);
-            handManager.RefreshHandLayout();
-            Canvas.ForceUpdateCanvases();
-            newCard.SnapToCurrentHandPose();
-            yield return StartCoroutine(cardAnimationController.AnimateDrawCardToHand(newCard));
-
-            drawsRemaining--;
-        }
-
-        UpdateDeckCountText();
-        isBusy = false;
-        RefreshDrawButtonState();
-    }
-
-    private IEnumerator ReturnRoomCardToHand(RoomSlot room)
-    {
-        if (room == null || !room.HasCard())
-            yield break;
-
-        if (!handManager.HasSpace)
-        {
-            Log("Hand is full.");
-            yield break;
-        }
-
-        GuestCard roomCard = room.CurrentCard;
-        room.ClearCard();
-
-        roomCard.SetSelected(false);
-
-        RectTransform handParent = handManager.GetHandContainer() as RectTransform;
-        roomCard.transform.SetParent(handParent, true);
-
-        handManager.AddToHand(roomCard, false);
-        handManager.RefreshHandLayout();
-        Canvas.ForceUpdateCanvases();
-
-        yield return StartCoroutine(cardAnimationController.AnimateCardToHandPose(roomCard));
-
-        UpdateDeckCountText();
-        RefreshDrawButtonState();
-        Log($"Returned {roomCard.DisplayName} to hand.");
-    }
-
-    private IEnumerator SwapHandCardWithRoomCard(GuestCard handCard, RoomSlot room)
-    {
-        if (handCard == null || room == null || room.CurrentCard == null || !room.CanAcceptGuest)
-            yield break;
-
-        GuestCard roomCard = room.CurrentCard;
-
-        handManager.RemoveFromHand(handCard);
-        room.ClearCard();
-
-        handCard.SetSelected(false);
-        roomCard.SetSelected(false);
-
-        yield return StartCoroutine(cardAnimationController.AnimateCardToTarget(handCard, room.GetCardAnchor()));
-        AssignCardToRoom(handCard, room);
-
-        RectTransform handParent = handManager.GetHandContainer() as RectTransform;
-        roomCard.transform.SetParent(handParent, true);
-
-        handManager.AddToHand(roomCard, false);
-        handManager.RefreshHandLayout();
-        Canvas.ForceUpdateCanvases();
-
-        yield return StartCoroutine(cardAnimationController.AnimateCardToHandPose(roomCard));
-    }
-
     private void AssignCardToRoom(GuestCard card, RoomSlot room)
     {
         room.SetCard(card);
         card.SetInRoom(room);
     }
 
-    private void SpawnRoomSlot(LevelRoomEntry roomData)
+    private void FinishInteraction()
     {
-        if (roomData == null)
-            return;
-
-        RoomSlot prefabToSpawn = roomData.slotType == SlotType.Elevator
-            ? elevatorSlotPrefab
-            : roomSlotPrefab;
-
-        if (prefabToSpawn == null)
-        {
-            Log(roomData.slotType == SlotType.Elevator
-                ? "Missing ElevatorSlot prefab."
-                : "Missing RoomSlot prefab.");
-            return;
-        }
-
-        RoomSlot newSlot = Instantiate(prefabToSpawn, roomGridParent);
-        newSlot.Initialize(this, roomData);
-        roomSlots.Add(newSlot);
+        DeselectCurrentSelection();
+        UpdateDeckCountText();
+        RefreshDrawButtonState();
+        isBusy = false;
     }
 
-    public void RefillHand()
-    {
-        DrawCards(drawAmountPerRefill);
-    }
+    #endregion
 
-    private void DeselectCurrentCard()
-    {
-        if (selectedCard != null)
-            selectedCard.SetSelected(false);
-
-        selectedCard = null;
-        selectedRoomSlot = null;
-
-        if (TraitTooltipPanel.Instance != null)
-            TraitTooltipPanel.Instance.Hide();
-    }
-
-    private void UpdateDeckCountText()
-    {
-        if (deckCountText != null && handManager != null)
-            deckCountText.text = $"{guestQueue.Count}";
-    }
+    #region Puzzle / Validation
 
     private void ApplyElevatorAdjacencyTraits()
     {
@@ -738,11 +735,31 @@ public class GameManager : MonoBehaviour
         return topFloor;
     }
 
+    #endregion
+
+    #region UI Helpers
+
+    private void RefreshDrawButtonState()
+    {
+        if (gameUIController == null || handManager == null)
+            return;
+
+        bool canDraw = !isBusy && guestQueue.Count > 0 && handManager.HasSpace;
+        gameUIController.SetDrawButtonState(canDraw);
+    }
+
+    private void UpdateDeckCountText()
+    {
+        gameUIController?.SetDeckCount(guestQueue.Count);
+    }
+
     private void Log(string message)
     {
-        Debug.Log(message);
-
-        if (debugText != null)
-            debugText.text = message;
+        if (gameUIController != null)
+            gameUIController.SetDebugMessage(message);
+        else
+            Debug.Log(message);
     }
+
+    #endregion
 }
