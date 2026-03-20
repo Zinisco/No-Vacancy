@@ -191,7 +191,7 @@ public class RoomSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
             case FloorPreference.SecondFloor:
                 return floorIndex == 2;
 
-            case FloorPreference.TopFloor:
+            case FloorPreference.ThirdFloor:
                 return floorIndex == topFloor;
 
             default:

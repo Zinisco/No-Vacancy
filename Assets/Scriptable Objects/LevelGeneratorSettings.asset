@@ -19,7 +19,7 @@ MonoBehaviour:
   topFloorFirst: 0
   elevatorColumnIndex: 2
   minTraitsPerRoom: 1
-  maxTraitsPerRoom: 4
+  maxTraitsPerRoom: 3
   minPreferencesPerGuest: 1
   maxPreferencesPerGuest: 3
   allowedTraits: 000000000100000002000000030000000600000005000000

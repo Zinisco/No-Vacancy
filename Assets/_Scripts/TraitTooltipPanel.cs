@@ -10,7 +10,6 @@ public class TraitTooltipPanel : MonoBehaviour
     [SerializeField] private GameObject root;
     [SerializeField] private TMP_Text titleText;
     [SerializeField] private TMP_Text subtitleText;
-    [SerializeField] private TMP_Text floorPreferenceText;
 
     [Header("Content")]
     [SerializeField] private Transform rowContainer;
@@ -18,6 +17,7 @@ public class TraitTooltipPanel : MonoBehaviour
 
     [Header("Icons")]
     [SerializeField] private RoomTraitIconDatabase traitIconDatabase;
+    [SerializeField] private FloorPreferenceIconDatabase floorPreferenceIconDatabase;
 
     private void Awake()
     {
@@ -59,7 +59,6 @@ public class TraitTooltipPanel : MonoBehaviour
     {
         ShowRoot(title, subtitle);
         ClearRows();
-        ClearFloorPreferenceText();
 
         if (traits == null || traits.Count == 0)
             return;
@@ -78,14 +77,27 @@ public class TraitTooltipPanel : MonoBehaviour
     {
         ShowRoot(title, subtitle);
         ClearRows();
-        SetFloorPreferenceText(floorPreferences);
 
-        if (traits == null || traits.Count == 0)
+        bool hasTraits = traits != null && traits.Count > 0;
+        bool hasFloorPrefs = floorPreferences != null && floorPreferences.Count > 0;
+
+        if (!hasTraits && !hasFloorPrefs)
             return;
 
-        for (int i = 0; i < traits.Count; i++)
+        if (hasTraits)
         {
-            AddTraitRow(traits[i]);
+            for (int i = 0; i < traits.Count; i++)
+            {
+                AddTraitRow(traits[i]);
+            }
+        }
+
+        if (hasFloorPrefs)
+        {
+            for (int i = 0; i < floorPreferences.Count; i++)
+            {
+                AddFloorPreferenceRow(floorPreferences[i]);
+            }
         }
     }
 
@@ -109,36 +121,12 @@ public class TraitTooltipPanel : MonoBehaviour
         row.SetData(icon, label);
     }
 
-    private void SetFloorPreferenceText(IReadOnlyList<FloorPreference> floorPreferences)
+    private void AddFloorPreferenceRow(FloorPreference preference)
     {
-        if (floorPreferenceText == null)
-            return;
-
-        if (floorPreferences == null || floorPreferences.Count == 0)
-        {
-            floorPreferenceText.text = "";
-            floorPreferenceText.gameObject.SetActive(false);
-            return;
-        }
-
-        List<string> labels = new List<string>();
-
-        for (int i = 0; i < floorPreferences.Count; i++)
-        {
-            labels.Add(FloorPreferenceUtility.GetDisplayName(floorPreferences[i]));
-        }
-
-        floorPreferenceText.text = string.Join(", ", labels);
-        floorPreferenceText.gameObject.SetActive(true);
-    }
-
-    private void ClearFloorPreferenceText()
-    {
-        if (floorPreferenceText == null)
-            return;
-
-        floorPreferenceText.text = "";
-        floorPreferenceText.gameObject.SetActive(false);
+        TooltipTraitRowUI row = Instantiate(rowPrefab, rowContainer);
+        Sprite icon = floorPreferenceIconDatabase != null ? floorPreferenceIconDatabase.GetIcon(preference) : null;
+        string label = FloorPreferenceUtility.GetDisplayName(preference);
+        row.SetData(icon, label);
     }
 
     public void Hide()
@@ -147,7 +135,6 @@ public class TraitTooltipPanel : MonoBehaviour
             root.SetActive(false);
 
         ClearRows();
-        ClearFloorPreferenceText();
     }
 
     private void ClearRows()

@@ -216,7 +216,7 @@ public static class LevelValidator
             case FloorPreference.SecondFloor:
                 return room.floorIndex == 2;
 
-            case FloorPreference.TopFloor:
+            case FloorPreference.ThirdFloor:
                 return room.floorIndex == topFloor;
 
             default:

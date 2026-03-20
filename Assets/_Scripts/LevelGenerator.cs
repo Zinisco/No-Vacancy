@@ -298,7 +298,7 @@ public static class LevelGenerator
             possible.Add(FloorPreference.SecondFloor);
 
         if (sourceRoom.floorIndex == topFloor)
-            possible.Add(FloorPreference.TopFloor);
+            possible.Add(FloorPreference.ThirdFloor);
 
         // Optional: randomly give 0 or 1 floor preferences.
         if (possible.Count > 0 && Random.value < 0.5f)

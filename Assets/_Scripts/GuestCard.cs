@@ -9,7 +9,6 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     [Header("UI")]
     [SerializeField] private TMP_Text nameText;
     [SerializeField] private Button button;
-    [SerializeField] private TMP_Text floorPreferenceText;
 
     [SerializeField] private List<RoomTrait> preferredTraits = new List<RoomTrait>();
     public IReadOnlyList<RoomTrait> PreferredTraits => preferredTraits;
@@ -21,6 +20,11 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     [SerializeField] private RoomTraitIconDatabase traitIconDatabase;
     [SerializeField] private Transform traitIconContainer;
     [SerializeField] private GameObject traitIconPrefab;
+
+    [Header("Floor Preference Icons")]
+    [SerializeField] private FloorPreferenceIconDatabase floorPreferenceIconDatabase;
+    [SerializeField] private Transform floorPreferenceIconContainer;
+    [SerializeField] private GameObject floorPreferenceIconPrefab;
 
     [Header("Selection Visual")]
     [SerializeField] private RectTransform visualRoot;
@@ -114,6 +118,7 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         RefreshVisualTargets(true);
         SetHandPose(Vector2.zero, 0f, true);
         RefreshTraitIcons();
+        RefreshFloorPreferenceIcons();
     }
 
     public void SetSelected(bool selected, bool instant = false)
@@ -303,28 +308,13 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         if (newPreferences != null)
             preferredFloorPreferences.AddRange(newPreferences);
 
-        RefreshFloorPreferenceText();
+        RefreshFloorPreferenceIcons();
     }
 
     private void RefreshTraitIcons()
     {
-        if (traitIconContainer == null)
-        {
-            Debug.LogWarning($"{name}: GuestCard traitIconContainer is not assigned.");
+        if (traitIconContainer == null || traitIconPrefab == null || traitIconDatabase == null)
             return;
-        }
-
-        if (traitIconPrefab == null)
-        {
-            Debug.LogWarning($"{name}: GuestCard traitIconPrefab is not assigned.");
-            return;
-        }
-
-        if (traitIconDatabase == null)
-        {
-            Debug.LogWarning($"{name}: GuestCard traitIconDatabase is not assigned.");
-            return;
-        }
 
         for (int i = traitIconContainer.childCount - 1; i >= 0; i--)
         {
@@ -351,32 +341,41 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
                     image.sprite = iconSprite;
                     image.enabled = iconSprite != null;
                 }
-                else
-                {
-                    Debug.LogWarning($"{iconObj.name}: spawned trait icon prefab has no TraitIconUI or Image.");
-                }
             }
         }
     }
 
-    private void RefreshFloorPreferenceText()
+    private void RefreshFloorPreferenceIcons()
     {
-        if (floorPreferenceText == null)
+        if (floorPreferenceIconContainer == null || floorPreferenceIconPrefab == null || floorPreferenceIconDatabase == null)
             return;
 
-        if (preferredFloorPreferences == null || preferredFloorPreferences.Count == 0)
+        for (int i = floorPreferenceIconContainer.childCount - 1; i >= 0; i--)
         {
-            floorPreferenceText.text = "";
-            return;
+            Destroy(floorPreferenceIconContainer.GetChild(i).gameObject);
         }
-
-        List<string> labels = new List<string>();
 
         for (int i = 0; i < preferredFloorPreferences.Count; i++)
         {
-            labels.Add(FloorPreferenceUtility.GetDisplayName(preferredFloorPreferences[i]));
-        }
+            FloorPreference preference = preferredFloorPreferences[i];
+            GameObject iconObj = Instantiate(floorPreferenceIconPrefab, floorPreferenceIconContainer);
 
-        floorPreferenceText.text = string.Join(", ", labels);
+            Sprite iconSprite = floorPreferenceIconDatabase.GetIcon(preference);
+
+            TraitIconUI iconUI = iconObj.GetComponent<TraitIconUI>();
+            if (iconUI != null)
+            {
+                iconUI.SetSprite(iconSprite);
+            }
+            else
+            {
+                Image image = iconObj.GetComponent<Image>();
+                if (image != null)
+                {
+                    image.sprite = iconSprite;
+                    image.enabled = iconSprite != null;
+                }
+            }
+        }
     }
 }

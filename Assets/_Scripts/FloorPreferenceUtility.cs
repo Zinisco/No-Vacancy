@@ -4,9 +4,9 @@ public static class FloorPreferenceUtility
     {
         switch (preference)
         {
-            case FloorPreference.FirstFloor: return "Bottom Floor";
-            case FloorPreference.SecondFloor: return "Middle Floor";
-            case FloorPreference.TopFloor: return "Top Floor";
+            case FloorPreference.FirstFloor: return "First Floor";
+            case FloorPreference.SecondFloor: return "Second Floor";
+            case FloorPreference.ThirdFloor: return "Third Floor";
             default: return preference.ToString();
         }
     }
