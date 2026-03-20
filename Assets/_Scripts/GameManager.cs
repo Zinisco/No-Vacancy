@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Managers")]
     [SerializeField] private HandManager handManager;
+    [SerializeField] private CardAnimationController cardAnimationController;
 
     [Header("Level Data")]
     [SerializeField] private LevelConfig levelConfig;
@@ -31,17 +32,6 @@ public class GameManager : MonoBehaviour
     [Header("Draw Settings")]
     [SerializeField] private int startingDrawAmount = 5;
     [SerializeField] private int drawAmountPerRefill = 3;
-
-    [Header("Animation")]
-    [SerializeField] private RectTransform animationLayer;
-    [SerializeField] private RectTransform drawSpawnPoint;
-    [SerializeField] private float cardMoveDuration = 0.18f;
-
-    [Header("Draw Animation")]
-    [SerializeField] private float drawStartRotationZ = -12f;
-    [SerializeField] private float drawOvershootDistance = 24f;
-    [SerializeField] private float drawSettleDuration = 0.08f;
-    [SerializeField] private float drawStaggerDelay = 0.03f;
 
     private int nextCardId = 0;
     private Queue<LevelGuestEntry> guestQueue = new();
@@ -416,8 +406,8 @@ public class GameManager : MonoBehaviour
         cardA.SetSelected(false);
         cardB.SetSelected(false);
 
-        yield return StartCoroutine(AnimateCardToTarget(cardA, roomB.GetCardAnchor()));
-        yield return StartCoroutine(AnimateCardToTarget(cardB, roomA.GetCardAnchor()));
+        yield return StartCoroutine(cardAnimationController.AnimateCardToTarget(cardA, roomB.GetCardAnchor()));
+        yield return StartCoroutine(cardAnimationController.AnimateCardToTarget(cardB, roomA.GetCardAnchor()));
 
         roomA.SetCard(cardB);
         cardB.SetInRoom(roomA);
@@ -465,7 +455,7 @@ public class GameManager : MonoBehaviour
 
         card.SetSelected(false);
 
-        yield return StartCoroutine(AnimateCardToTarget(card, toRoom.GetCardAnchor()));
+        yield return StartCoroutine(cardAnimationController.AnimateCardToTarget(card, toRoom.GetCardAnchor()));
 
         toRoom.SetCard(card);
         card.SetInRoom(toRoom);
@@ -479,7 +469,7 @@ public class GameManager : MonoBehaviour
         handManager.RemoveFromHand(card);
         card.SetSelected(false);
 
-        yield return StartCoroutine(AnimateCardToTarget(card, targetRoom.GetCardAnchor()));
+        yield return StartCoroutine(cardAnimationController.AnimateCardToTarget(card, targetRoom.GetCardAnchor()));
 
         targetRoom.SetCard(card);
         card.SetInRoom(targetRoom);
@@ -504,105 +494,26 @@ public class GameManager : MonoBehaviour
             nextCardId++;
             string cardId = $"CARD_{nextCardId:D3}";
 
-            RectTransform spawnParent = animationLayer != null
-                ? animationLayer
-                : handManager.GetHandContainer() as RectTransform;
-
-            GuestCard newCard = Instantiate(guestCardPrefab, spawnParent);
+            RectTransform handParent = handManager.GetHandContainer() as RectTransform;
+            GuestCard newCard = Instantiate(guestCardPrefab, handParent);
             RectTransform newCardRect = newCard.transform as RectTransform;
 
             newCard.Initialize(cardId, guestName, this);
             newCard.SetPreferredTraits(preferredTraitsToUse);
             newCard.SetPreferredFloorPreferences(guestData.preferredFloorPreferences);
-
-            if (newCardRect != null && drawSpawnPoint != null)
-            {
-                newCardRect.position = drawSpawnPoint.position;
-                newCardRect.localScale = Vector3.one;
-                newCardRect.rotation = Quaternion.Euler(0f, 0f, drawStartRotationZ);
-            }
-
+            
             handManager.AddToHand(newCard, false);
-
-            yield return StartCoroutine(AnimateDrawCardToHand(newCard, handManager.GetHandContainer()));
-
             handManager.RefreshHandLayout();
-            drawsRemaining--;
+            Canvas.ForceUpdateCanvases();
+            newCard.SnapToCurrentHandPose();
+            yield return StartCoroutine(cardAnimationController.AnimateDrawCardToHand(newCard));
 
-            yield return new WaitForSeconds(drawStaggerDelay);
+            drawsRemaining--;
         }
 
         UpdateDeckCountText();
         isBusy = false;
         RefreshDrawButtonState();
-    }
-
-    private IEnumerator AnimateDrawCardToHand(GuestCard card, Transform targetParent)
-    {
-        if (card == null || targetParent == null)
-            yield break;
-
-        RectTransform cardRect = card.transform as RectTransform;
-        RectTransform targetRect = targetParent as RectTransform;
-
-        if (cardRect == null || targetRect == null)
-        {
-            card.transform.SetParent(targetParent, false);
-            card.transform.localPosition = Vector3.zero;
-            card.transform.localScale = Vector3.one;
-            card.transform.rotation = Quaternion.identity;
-            yield break;
-        }
-
-        Canvas rootCanvas = card.GetComponentInParent<Canvas>();
-        Transform animParent = animationLayer != null ? animationLayer : rootCanvas.transform;
-
-        Vector3 startWorldPos = cardRect.position;
-        Vector3 finalWorldPos = targetRect.position;
-
-        // Overshoot slightly past the hand, then settle back.
-        Vector3 direction = (finalWorldPos - startWorldPos).normalized;
-        Vector3 overshootWorldPos = finalWorldPos + direction * drawOvershootDistance;
-
-        Quaternion startRotation = cardRect.rotation;
-        Quaternion midRotation = Quaternion.Euler(0f, 0f, 4f);
-        Quaternion endRotation = Quaternion.identity;
-
-        card.transform.SetParent(animParent, true);
-        cardRect.position = startWorldPos;
-
-        float elapsed = 0f;
-
-        while (elapsed < cardMoveDuration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / cardMoveDuration);
-            float eased = Mathf.SmoothStep(0f, 1f, t);
-
-            cardRect.position = Vector3.Lerp(startWorldPos, overshootWorldPos, eased);
-            cardRect.rotation = Quaternion.Lerp(startRotation, midRotation, eased);
-
-            yield return null;
-        }
-
-        elapsed = 0f;
-
-        while (elapsed < drawSettleDuration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / drawSettleDuration);
-            float eased = Mathf.SmoothStep(0f, 1f, t);
-
-            cardRect.position = Vector3.Lerp(overshootWorldPos, finalWorldPos, eased);
-            cardRect.rotation = Quaternion.Lerp(midRotation, endRotation, eased);
-
-            yield return null;
-        }
-
-        card.transform.SetParent(targetParent, false);
-        cardRect.anchoredPosition = Vector2.zero;
-        cardRect.localScale = Vector3.one;
-        cardRect.localRotation = Quaternion.identity;
     }
 
     private IEnumerator ReturnRoomCardToHand(RoomSlot room)
@@ -621,10 +532,14 @@ public class GameManager : MonoBehaviour
 
         roomCard.SetSelected(false);
 
-        yield return StartCoroutine(AnimateCardToTarget(roomCard, handManager.GetHandContainer()));
+        RectTransform handParent = handManager.GetHandContainer() as RectTransform;
+        roomCard.transform.SetParent(handParent, true);
 
         handManager.AddToHand(roomCard, false);
         handManager.RefreshHandLayout();
+        Canvas.ForceUpdateCanvases();
+
+        yield return StartCoroutine(cardAnimationController.AnimateCardToHandPose(roomCard));
 
         UpdateDeckCountText();
         RefreshDrawButtonState();
@@ -644,12 +559,17 @@ public class GameManager : MonoBehaviour
         handCard.SetSelected(false);
         roomCard.SetSelected(false);
 
-        yield return StartCoroutine(AnimateCardToTarget(handCard, room.GetCardAnchor()));
+        yield return StartCoroutine(cardAnimationController.AnimateCardToTarget(handCard, room.GetCardAnchor()));
         AssignCardToRoom(handCard, room);
 
-        yield return StartCoroutine(AnimateCardToTarget(roomCard, handManager.GetHandContainer()));
+        RectTransform handParent = handManager.GetHandContainer() as RectTransform;
+        roomCard.transform.SetParent(handParent, true);
+
         handManager.AddToHand(roomCard, false);
         handManager.RefreshHandLayout();
+        Canvas.ForceUpdateCanvases();
+
+        yield return StartCoroutine(cardAnimationController.AnimateCardToHandPose(roomCard));
     }
 
     private void AssignCardToRoom(GuestCard card, RoomSlot room)
@@ -700,49 +620,7 @@ public class GameManager : MonoBehaviour
     private void UpdateDeckCountText()
     {
         if (deckCountText != null && handManager != null)
-            deckCountText.text = $"Deck: {guestQueue.Count}   Hand: {handManager.CurrentHandCount}/{handManager.CurrentMaxHandSize}";
-    }
-
-    private IEnumerator AnimateCardToTarget(GuestCard card, Transform targetParent)
-    {
-        if (card == null || targetParent == null)
-            yield break;
-
-        RectTransform cardRect = card.transform as RectTransform;
-        RectTransform targetRect = targetParent as RectTransform;
-
-        if (cardRect == null || targetRect == null)
-        {
-            card.transform.SetParent(targetParent, false);
-            card.transform.localPosition = Vector3.zero;
-            card.transform.localScale = Vector3.one;
-            yield break;
-        }
-
-        Canvas rootCanvas = card.GetComponentInParent<Canvas>();
-        Transform animParent = animationLayer != null ? animationLayer : rootCanvas.transform;
-
-        Vector3 startWorldPos = cardRect.position;
-        Vector3 endWorldPos = targetRect.position;
-
-        card.transform.SetParent(animParent, true);
-        cardRect.position = startWorldPos;
-
-        float elapsed = 0f;
-
-        while (elapsed < cardMoveDuration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / cardMoveDuration);
-            t = Mathf.SmoothStep(0f, 1f, t);
-
-            cardRect.position = Vector3.Lerp(startWorldPos, endWorldPos, t);
-            yield return null;
-        }
-
-        card.transform.SetParent(targetParent, false);
-        cardRect.anchoredPosition = Vector2.zero;
-        cardRect.localScale = Vector3.one;
+            deckCountText.text = $"{guestQueue.Count}";
     }
 
     private void ApplyElevatorAdjacencyTraits()

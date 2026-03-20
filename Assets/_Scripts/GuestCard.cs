@@ -39,6 +39,8 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     [Header("Hand Fan")]
     [SerializeField] private float handPoseLerpSpeed = 14f;
 
+    private bool handPoseLerpEnabled = true;
+
     public string CardId { get; private set; }
     public string DisplayName { get; private set; }
 
@@ -71,7 +73,7 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
     private void Update()
     {
-        if (rootRect != null)
+        if (rootRect != null && handPoseLerpEnabled)
         {
             rootRect.anchoredPosition = Vector2.Lerp(
                 rootRect.anchoredPosition,
@@ -343,6 +345,45 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
                 }
             }
         }
+    }
+
+    public void SnapToCurrentHandPose()
+    {
+        if (rootRect != null)
+        {
+            rootRect.anchoredPosition = targetHandAnchoredPos;
+            rootRect.localRotation = Quaternion.Euler(0f, 0f, targetHandRotationZ);
+        }
+
+        if (visualRect != null)
+        {
+            visualRect.anchoredPosition = targetVisualOffset;
+            visualRect.localScale = targetVisualScale;
+        }
+    }
+
+    public Vector2 GetTargetHandAnchoredPos()
+    {
+        return targetHandAnchoredPos;
+    }
+
+    public float GetTargetHandRotationZ()
+    {
+        return targetHandRotationZ;
+    }
+
+    public void SetRootPoseInstant(Vector2 anchoredPos, float rotationZ)
+    {
+        if (rootRect != null)
+        {
+            rootRect.anchoredPosition = anchoredPos;
+            rootRect.localRotation = Quaternion.Euler(0f, 0f, rotationZ);
+        }
+    }
+
+    public void SetHandPoseLerpEnabled(bool enabled)
+    {
+        handPoseLerpEnabled = enabled;
     }
 
     private void RefreshFloorPreferenceIcons()
