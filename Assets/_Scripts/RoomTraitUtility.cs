@@ -9,8 +9,6 @@ public static class RoomTraitUtility
             case RoomTrait.Luxury: return "Luxury";
             case RoomTrait.Budget: return "Budget";
             case RoomTrait.Scenic: return "Scenic";
-            case RoomTrait.Smoking: return "Smoking";
-            case RoomTrait.NonSmoking: return "Non-Smoking";
             case RoomTrait.NearElevator: return "Near Elevator";
             case RoomTrait.NearPool: return "Near Pool";
             case RoomTrait.Balcony: return "Balcony";

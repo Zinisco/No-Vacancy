@@ -27,4 +27,6 @@ public class LevelGuestEntry
     public string guestName;
     public List<RoomTrait> preferredTraits = new List<RoomTrait>();
     public List<FloorPreference> preferredFloorPreferences = new List<FloorPreference>();
+    public List<GuestAdjacencyPreference> adjacencyPreferences = new List<GuestAdjacencyPreference>();
+    public List<GuestBehaviorTrait> behaviorTraits = new List<GuestBehaviorTrait>();
 }

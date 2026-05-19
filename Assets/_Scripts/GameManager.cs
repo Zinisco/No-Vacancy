@@ -6,6 +6,19 @@ using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
+    // GameManager is the main brain of the puzzle scene.
+    // It does not represent one card or one room.
+    // Instead, it coordinates everything:
+    //
+    // - Creates rooms from LevelConfig
+    // - Creates guest cards from LevelConfig
+    // - Draws cards into the hand
+    // - Handles left/right clicks on cards and rooms
+    // - Moves cards between hand and rooms
+    // - Swaps cards
+    // - Checks if guests are correctly placed
+    // - Updates UI/debug text
+
     [Header("Prefabs")]
     [SerializeField] private GuestCard guestCardPrefab;
 
@@ -37,6 +50,8 @@ public class GameManager : MonoBehaviour
 
     #region Unity Lifecycle
 
+
+    //Check that all necessary references are assigned, then initialize the rooms and start the game.
     private void Start()
     {
         if (!ValidateReferences())
@@ -46,6 +61,7 @@ public class GameManager : MonoBehaviour
         StartGame();
     }
 
+    // Handle deselection when clicking outside of cards/rooms.
     private void Update()
     {
         if (isBusy)
@@ -64,6 +80,7 @@ public class GameManager : MonoBehaviour
 
     #region Setup
 
+    // Validate that all necessary references are assigned in the inspector.
     private bool ValidateReferences()
     {
         if (handManager == null)
@@ -93,6 +110,8 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
+    // Clear existing rooms and create new ones based on the LevelConfig.
+    // Also applies traits to rooms based on their adjacency to elevators.
     private void InitializeRooms()
     {
         roomSlots.Clear();
@@ -110,6 +129,7 @@ public class GameManager : MonoBehaviour
         ApplyElevatorAdjacencyTraits();
     }
 
+    // Start the game by filling the guest queue, setting hand size, and drawing starting cards.
     private void StartGame()
     {
         if (levelConfig.rooms.Count == 0)
@@ -142,6 +162,7 @@ public class GameManager : MonoBehaviour
         Log($"Game started. Rooms: {roomCount}, Hand Size: {clampedHandSize}");
     }
 
+    // Spawn a RoomSlot or ElevatorSlot based on the provided LevelRoomEntry data.
     private void SpawnRoomSlot(LevelRoomEntry roomData)
     {
         if (roomData == null)
@@ -168,7 +189,8 @@ public class GameManager : MonoBehaviour
 
     #region Public Input Entry Points
 
-    public void DrawCards(int amount)
+    // Called by UI buttons or other scripts to draw cards into the hand.
+    public void DrawCards(int amount) 
     {
         if (isBusy)
             return;
@@ -176,12 +198,14 @@ public class GameManager : MonoBehaviour
         StartCoroutine(DrawCardsRoutine(amount));
     }
 
-    public void RefillHand()
+    // Draw cards up to the specified refill amount.
+    public void RefillHand() 
     {
         DrawCards(drawAmountPerRefill);
     }
 
-    public void OnDrawButtonPressed()
+    // Called by the UI when the player clicks the "Draw" button.
+    public void OnDrawButtonPressed() 
     {
         if (isBusy)
             return;
@@ -202,7 +226,8 @@ public class GameManager : MonoBehaviour
         Log($"Drew up to {drawAmountPerRefill} card(s).");
     }
 
-    public void OnGuestCardLeftClicked(GuestCard card)
+    // Called by GuestCard when it detects a left-click on itself.
+    public void OnGuestCardLeftClicked(GuestCard card) 
     {
         if (card == null || isBusy)
             return;
@@ -222,7 +247,8 @@ public class GameManager : MonoBehaviour
         StartCoroutine(HandleCardToCardInteraction(selectedCard, card));
     }
 
-    public void OnGuestCardRightClicked(GuestCard card)
+    // Called by GuestCard when it detects a right-click on itself.
+    public void OnGuestCardRightClicked(GuestCard card) 
     {
         if (card == null || isBusy)
             return;
@@ -233,7 +259,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void OnRoomLeftClicked(RoomSlot room)
+    // Called by RoomSlot when it detects a left-click on itself.
+    public void OnRoomLeftClicked(RoomSlot room) 
     {
         if (room == null || isBusy)
             return;
@@ -260,7 +287,8 @@ public class GameManager : MonoBehaviour
         OnGuestCardLeftClicked(room.CurrentCard);
     }
 
-    public void OnRoomRightClicked(RoomSlot room)
+    // Called by RoomSlot when it detects a right-click on itself.
+    public void OnRoomRightClicked(RoomSlot room) 
     {
         if (room == null || isBusy)
             return;
@@ -278,6 +306,7 @@ public class GameManager : MonoBehaviour
 
     #region Selection
 
+    // Handles selecting a card, showing its tooltip, and deselecting if the same card is clicked again.
     public void SelectCard(GuestCard card)
     {
         if (card == null)
@@ -307,7 +336,8 @@ public class GameManager : MonoBehaviour
         Log($"Selected {card.DisplayName} from {location}");
     }
 
-    private void SelectRoomSlot(RoomSlot room)
+    // Handles selecting a room slot, showing its tooltip, and deselecting if the same slot is clicked again.
+    private void SelectRoomSlot(RoomSlot room) 
     {
         if (room == null)
             return;
@@ -328,6 +358,7 @@ public class GameManager : MonoBehaviour
         Log($"Selected {room.GetHolderName()}");
     }
 
+    // Deselects any currently selected card or room slot and hides tooltips.
     private void DeselectCurrentSelection()
     {
         if (selectedCard != null)
@@ -339,7 +370,8 @@ public class GameManager : MonoBehaviour
         gameUIController?.HideTooltip();
     }
 
-    private void DeselectSelectedRoomSlot()
+    // Deselects the currently selected room slot and hides tooltips.
+    private void DeselectSelectedRoomSlot() 
     {
         selectedRoomSlot = null;
         gameUIController?.HideTooltip();
@@ -349,7 +381,8 @@ public class GameManager : MonoBehaviour
 
     #region Draw / Hand Flow
 
-    private IEnumerator DrawCardsRoutine(int amount)
+    // Draws cards from the guest queue into the player's hand with animations and staggered timing.
+    private IEnumerator DrawCardsRoutine(int amount) 
     {
         if (guestCardPrefab == null || handManager == null)
             yield break;
@@ -382,7 +415,8 @@ public class GameManager : MonoBehaviour
         RefreshDrawButtonState();
     }
 
-    private GuestCard CreateGuestCardFromData(LevelGuestEntry guestData)
+    // Instantiates a GuestCard prefab and initializes it with data from the LevelGuestEntry.
+    private GuestCard CreateGuestCardFromData(LevelGuestEntry guestData) 
     {
         string guestName = guestData.guestName;
         string cardId = $"CARD_{++nextCardId:D3}";
@@ -393,11 +427,14 @@ public class GameManager : MonoBehaviour
         newCard.Initialize(cardId, guestName, this);
         newCard.SetPreferredTraits(guestData.preferredTraits);
         newCard.SetPreferredFloorPreferences(guestData.preferredFloorPreferences);
+        newCard.SetAdjacencyPreferences(guestData.adjacencyPreferences);
+        newCard.SetBehaviorTraits(guestData.behaviorTraits);
 
         return newCard;
     }
 
-    private IEnumerator ReturnRoomCardToHand(RoomSlot room)
+    // Handles returning a card from a room back to the player's hand with animation.
+    private IEnumerator ReturnRoomCardToHand(RoomSlot room) 
     {
         if (room == null || !room.HasCard())
             yield break;
@@ -419,7 +456,8 @@ public class GameManager : MonoBehaviour
         Log($"Returned {roomCard.DisplayName} to hand.");
     }
 
-    private IEnumerator AddRoomCardBackToHand(GuestCard card)
+    // Animates a card moving back to the hand and adds it to the hand manager.
+    private IEnumerator AddRoomCardBackToHand(GuestCard card) 
     {
         if (card == null)
             yield break;
@@ -438,7 +476,9 @@ public class GameManager : MonoBehaviour
 
     #region Card Interactions
 
-    private IEnumerator HandleCardToCardInteraction(GuestCard firstCard, GuestCard secondCard)
+    // Handles interactions when one card is selected and the player clicks on another card,
+    // determining if they should swap or just select the new card.
+    private IEnumerator HandleCardToCardInteraction(GuestCard firstCard, GuestCard secondCard) 
     {
         if (firstCard == null || secondCard == null || isBusy)
             yield break;
@@ -504,7 +544,8 @@ public class GameManager : MonoBehaviour
         RefreshDrawButtonState();
     }
 
-    private IEnumerator SwapHandCardWithRoomCard(GuestCard handCard, RoomSlot room)
+    // Handles swapping a card from the hand with a card in a room, including animations and updating references.
+    private IEnumerator SwapHandCardWithRoomCard(GuestCard handCard, RoomSlot room) 
     {
         if (handCard == null || room == null || room.CurrentCard == null || !room.CanAcceptGuest)
             yield break;
@@ -523,7 +564,8 @@ public class GameManager : MonoBehaviour
         yield return StartCoroutine(AddRoomCardBackToHand(roomCard));
     }
 
-    private IEnumerator SwapRoomCards(RoomSlot roomA, RoomSlot roomB)
+    // Handles swapping two cards between two room slots, including animations and updating references.
+    private IEnumerator SwapRoomCards(RoomSlot roomA, RoomSlot roomB) 
     {
         if (roomA == null || roomB == null || !roomA.HasCard() || !roomB.HasCard())
             yield break;
@@ -547,7 +589,9 @@ public class GameManager : MonoBehaviour
         cardA.SetInRoom(roomB);
     }
 
-    private IEnumerator HandleEmptyRoomInteraction(RoomSlot room)
+    // Handles placing a card from the hand into an empty room or moving a card from one room to an empty room,
+    // including animations and updating references.
+    private IEnumerator HandleEmptyRoomInteraction(RoomSlot room) 
     {
         if (room == null || selectedCard == null || isBusy)
             yield break;
@@ -572,7 +616,8 @@ public class GameManager : MonoBehaviour
         CheckWinState();
     }
 
-    private IEnumerator MoveHandCardToRoom(GuestCard card, RoomSlot targetRoom)
+    // Handles moving a card from the hand to an empty room, including animation and updating references.
+    private IEnumerator MoveHandCardToRoom(GuestCard card, RoomSlot targetRoom) 
     {
         if (card == null || targetRoom == null || !targetRoom.CanAcceptGuest)
             yield break;
@@ -586,7 +631,8 @@ public class GameManager : MonoBehaviour
         card.SetInRoom(targetRoom);
     }
 
-    private IEnumerator MoveRoomCardToEmptyRoom(RoomSlot fromRoom, RoomSlot toRoom)
+    // Handles moving a card from one room to another empty room, including animation and updating references.
+    private IEnumerator MoveRoomCardToEmptyRoom(RoomSlot fromRoom, RoomSlot toRoom) 
     {
         if (fromRoom == null || toRoom == null || !fromRoom.HasCard() || toRoom.HasCard() || !toRoom.CanAcceptGuest)
             yield break;
@@ -602,13 +648,15 @@ public class GameManager : MonoBehaviour
         card.SetInRoom(toRoom);
     }
 
-    private void AssignCardToRoom(GuestCard card, RoomSlot room)
+    // Helper method to set the card in the room and update the card's reference to its current room.
+    private void AssignCardToRoom(GuestCard card, RoomSlot room) 
     {
         room.SetCard(card);
         card.SetInRoom(room);
     }
 
-    private void FinishInteraction()
+    // Common cleanup after any card interaction, such as deselecting and refreshing UI states.
+    private void FinishInteraction() 
     {
         DeselectCurrentSelection();
         UpdateDeckCountText();
@@ -620,7 +668,9 @@ public class GameManager : MonoBehaviour
 
     #region Puzzle / Validation
 
-    private void ApplyElevatorAdjacencyTraits()
+    // After creating all rooms, check which ones are adjacent to elevators
+    // and apply the NearElevator trait accordingly.
+    private void ApplyElevatorAdjacencyTraits() 
     {
         List<RoomSlot> elevators = new List<RoomSlot>();
 
@@ -655,7 +705,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public bool AreAllPlacedGuestsCorrect()
+    // Checks if all guests that are currently placed in rooms are in their perfect match rooms,
+    // and returns false if any guest is incorrectly placed. Also returns false if no guests are placed.
+    public bool AreAllPlacedGuestsCorrect() 
     {
         bool hasAnyPlacedGuest = false;
 
@@ -676,7 +728,9 @@ public class GameManager : MonoBehaviour
         return hasAnyPlacedGuest;
     }
 
-    public bool IsRoomCorrect(RoomSlot room)
+    // Helper method to check if a specific room has a guest
+    // and if that guest is a perfect match for the room.
+    public bool IsRoomCorrect(RoomSlot room) 
     {
         if (room == null || !room.HasCard() || room.CurrentCard == null)
             return false;
@@ -684,7 +738,9 @@ public class GameManager : MonoBehaviour
         return room.CurrentCard.IsPerfectMatch(room);
     }
 
-    private void CheckWinState()
+    // Checks if all placed guests are correct and logs the current progress.
+    // If all guests are correctly placed, it logs a win message.
+    private void CheckWinState() 
     {
         Log($"Correct rooms: {CountCorrectlyAssignedGuests()} / {GetGuestRoomSlotCount()}");
 
@@ -694,7 +750,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public int CountCorrectlyAssignedGuests()
+    // Counts how many guests are currently placed in rooms that are a perfect match for them.
+    public int CountCorrectlyAssignedGuests() 
     {
         int correct = 0;
 
@@ -709,7 +766,8 @@ public class GameManager : MonoBehaviour
         return correct;
     }
 
-    private int GetGuestRoomSlotCount()
+    // Counts how many room slots can accept guests (i.e. are not elevators).
+    private int GetGuestRoomSlotCount() 
     {
         int count = 0;
 
@@ -722,7 +780,8 @@ public class GameManager : MonoBehaviour
         return count;
     }
 
-    public int GetTopFloorIndex()
+    // Helper method to find the highest floor index among all room slots that can accept guests.
+    public int GetTopFloorIndex() 
     {
         int topFloor = 1;
 
@@ -735,11 +794,34 @@ public class GameManager : MonoBehaviour
         return topFloor;
     }
 
+    public List<RoomSlot> GetNoiseAdjacentRooms(RoomSlot room)
+    {
+        List<RoomSlot> adjacentRooms = new();
+
+        if (room == null)
+            return adjacentRooms;
+
+        for (int i = 0; i < roomSlots.Count; i++)
+        {
+            RoomSlot other = roomSlots[i];
+
+            if (other == null || other == room)
+                continue;
+
+            if (room.IsNoiseAdjacentTo(other))
+                adjacentRooms.Add(other);
+        }
+
+        return adjacentRooms;
+    }
+
     #endregion
 
     #region UI Helpers
 
-    private void RefreshDrawButtonState()
+    // Enables or disables the draw button based on whether the game is busy,
+    // if there are cards left in the queue, and if there is space in the hand.
+    private void RefreshDrawButtonState() 
     {
         if (gameUIController == null || handManager == null)
             return;
@@ -748,17 +830,40 @@ public class GameManager : MonoBehaviour
         gameUIController.SetDrawButtonState(canDraw);
     }
 
-    private void UpdateDeckCountText()
+    // Updates the UI element that shows how many cards are left in the deck/queue.
+    private void UpdateDeckCountText() 
     {
         gameUIController?.SetDeckCount(guestQueue.Count);
     }
 
-    private void Log(string message)
+    // Logs a message to the GameUIController if it exists, otherwise logs to the console.
+    private void Log(string message) 
     {
         if (gameUIController != null)
             gameUIController.SetDebugMessage(message);
         else
             Debug.Log(message);
+    }
+
+    public List<RoomSlot> GetAdjacentRooms(RoomSlot room)
+    {
+        List<RoomSlot> adjacentRooms = new();
+
+        if (room == null)
+            return adjacentRooms;
+
+        for (int i = 0; i < roomSlots.Count; i++)
+        {
+            RoomSlot other = roomSlots[i];
+
+            if (other == null || other == room)
+                continue;
+
+            if (room.IsAdjacentTo(other))
+                adjacentRooms.Add(other);
+        }
+
+        return adjacentRooms;
     }
 
     #endregion

@@ -37,7 +37,7 @@ public class TraitTooltipPanel : MonoBehaviour
             return;
 
         string title = room.IsElevator ? room.RoomNumber : $"Room {room.RoomNumber}";
-        string subtitle = room.IsElevator ? "Elevator" : "Room Traits";
+        string subtitle = room.IsElevator ? "Elevator" : "Amenities";
 
         ShowRoomContent(title, subtitle, room.Traits);
     }

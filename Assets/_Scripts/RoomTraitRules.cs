@@ -4,9 +4,6 @@ public static class RoomTraitRules
 {
     private static readonly Dictionary<RoomTrait, HashSet<RoomTrait>> conflicts = new()
     {
-        { RoomTrait.Smoking,      new HashSet<RoomTrait> { RoomTrait.NonSmoking } },
-        { RoomTrait.NonSmoking,   new HashSet<RoomTrait> { RoomTrait.Smoking } },
-
         { RoomTrait.OneBed,       new HashSet<RoomTrait> { RoomTrait.TwoBeds } },
         { RoomTrait.TwoBeds,      new HashSet<RoomTrait> { RoomTrait.OneBed } },
 

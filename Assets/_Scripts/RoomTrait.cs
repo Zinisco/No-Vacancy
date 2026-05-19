@@ -5,8 +5,6 @@ public enum RoomTrait
     Luxury,
     Budget,
     Scenic,
-    Smoking,
-    NonSmoking,
     NearElevator,
     NearPool,
     Balcony

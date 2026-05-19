@@ -17,9 +17,9 @@ public class LevelGeneratorSettings : ScriptableObject
     public int elevatorColumnIndex = 1;
 
     [Header("Generation")]
-    public int minTraitsPerRoom = 2;
+    public int minTraitsPerRoom = 1;
     public int maxTraitsPerRoom = 4;
-    public int minPreferencesPerGuest = 2;
+    public int minPreferencesPerGuest = 1;
     public int maxPreferencesPerGuest = 3;
 
     [Header("Trait Pool")]
