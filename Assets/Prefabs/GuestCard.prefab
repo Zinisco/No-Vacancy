@@ -420,7 +420,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GuestCard
   nameText: {fileID: 6561832609982371154}
   button: {fileID: 2990225986877796226}
+  adjacencyPreferences: []
   preferredTraits: 
+  behaviorTraits: 
   preferredFloorPreferences: 
   traitIconDatabase: {fileID: 11400000, guid: 204cb177f883cdc418c8b085774a1720, type: 2}
   traitIconContainer: {fileID: 4274667019411445341}

@@ -56,7 +56,7 @@ public static class LevelValidator
 
         int ambiguousGuests = 0;
 
-        for (int i = 0; i < guests.Count; i++)
+       for (int i = 0; i < guests.Count; i++)
         {
             int matches = CountMatchingRoomsForGuest(rooms, guests[i], topFloor);
 

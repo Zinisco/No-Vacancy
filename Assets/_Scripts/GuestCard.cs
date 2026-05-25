@@ -23,6 +23,9 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     // Button reference. Not heavily used here, but useful for UI behavior later.
     [SerializeField] private Button button;
 
+    // List of basic requirements for this guest, such as needing a bed or a non-smoking room.
+    [SerializeField] private List<GuestRequirement> requirements = new();
+
     // List of adjacency preferences for this guest, such as hating a smoking neighbor or wanting a specific guest next door
     [SerializeField] private List<GuestAdjacencyPreference> adjacencyPreferences = new();
     public IReadOnlyList<GuestAdjacencyPreference> AdjacencyPreferences => adjacencyPreferences;
@@ -54,6 +57,21 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
     // Prefab used for each room trait icon.
     [SerializeField] private GameObject traitIconPrefab;
+
+    [Header("Behavior Icons")]
+    [SerializeField] private GuestBehaviorIconDatabase behaviorIconDatabase;
+    [SerializeField] private Transform behaviorIconContainer;
+    [SerializeField] private GameObject behaviorIconPrefab;
+
+    [Header("Requirement Icons")]
+    [SerializeField] private GuestRequirementIconDatabase requirementIconDatabase;
+    [SerializeField] private Transform requirementIconContainer;
+    [SerializeField] private GameObject requirementIconPrefab;
+
+    [Header("Adjacency Preference Icons")]
+    [SerializeField] private GuestAdjacencyPreferenceIconDatabase adjacencyIconDatabase;
+    [SerializeField] private Transform adjacencyIconContainer;
+    [SerializeField] private GameObject adjacencyIconPrefab;
 
     [Header("Floor Preference Icons")]
 
@@ -216,6 +234,9 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         SetHandPose(Vector2.zero, 0f, true);
         RefreshTraitIcons();
         RefreshFloorPreferenceIcons();
+        RefreshBehaviorIcons();
+        RefreshRequirementIcons();
+        RefreshAdjacencyIcons();
     }
 
     // Sets whether this card is selected.
@@ -417,6 +438,9 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         if (!MatchesAdjacencyPreferences(room))
             return false;
 
+        if (!MatchesRequirements(room))
+            return false;
+
         // If all checks passed, the guest is perfectly matched.
         return true;
     }
@@ -441,6 +465,44 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
             preferredFloorPreferences.AddRange(newPreferences);
 
         RefreshFloorPreferenceIcons();
+    }
+
+    private void RefreshBehaviorIcons()
+    {
+        if (behaviorIconContainer == null || behaviorIconPrefab == null || behaviorIconDatabase == null)
+            return;
+
+        for (int i = behaviorIconContainer.childCount - 1; i >= 0; i--)
+            Destroy(behaviorIconContainer.GetChild(i).gameObject);
+
+        for (int i = 0; i < behaviorTraits.Count; i++)
+        {
+            GameObject iconObj = Instantiate(behaviorIconPrefab, behaviorIconContainer);
+            Sprite iconSprite = behaviorIconDatabase.GetIcon(behaviorTraits[i]);
+
+            TraitIconUI iconUI = iconObj.GetComponent<TraitIconUI>();
+            if (iconUI != null)
+                iconUI.SetSprite(iconSprite);
+        }
+    }
+
+    private void RefreshRequirementIcons()
+    {
+        if (requirementIconContainer == null || requirementIconPrefab == null || requirementIconDatabase == null)
+            return;
+
+        for (int i = requirementIconContainer.childCount - 1; i >= 0; i--)
+            Destroy(requirementIconContainer.GetChild(i).gameObject);
+
+        for (int i = 0; i < requirements.Count; i++)
+        {
+            GameObject iconObj = Instantiate(requirementIconPrefab, requirementIconContainer);
+            Sprite iconSprite = requirementIconDatabase.GetIcon(requirements[i]);
+
+            TraitIconUI iconUI = iconObj.GetComponent<TraitIconUI>();
+            if (iconUI != null)
+                iconUI.SetSprite(iconSprite);
+        }
     }
 
     // Rebuilds the room trait icons on the guest card.
@@ -477,6 +539,27 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
                     image.enabled = iconSprite != null;
                 }
             }
+        }
+    }
+
+    private void RefreshAdjacencyIcons()
+    {
+        if (adjacencyIconContainer == null || adjacencyIconPrefab == null || adjacencyIconDatabase == null)
+            return;
+
+        for (int i = adjacencyIconContainer.childCount - 1; i >= 0; i--)
+            Destroy(adjacencyIconContainer.GetChild(i).gameObject);
+
+        for (int i = 0; i < adjacencyPreferences.Count; i++)
+        {
+            GuestAdjacencyPreference preference = adjacencyPreferences[i];
+
+            GameObject iconObj = Instantiate(adjacencyIconPrefab, adjacencyIconContainer);
+            Sprite iconSprite = adjacencyIconDatabase.GetIcon(preference.type);
+
+            TraitIconUI iconUI = iconObj.GetComponent<TraitIconUI>();
+            if (iconUI != null)
+                iconUI.SetSprite(iconSprite);
         }
     }
 
@@ -530,12 +613,30 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     }
 
     // Sets this guest's adjacency preferences.
-    public void SetAdjacencyPreferences(List<GuestAdjacencyPreference> newPreferences) 
+    public void SetAdjacencyPreferences(List<GuestAdjacencyPreference> newPreferences)
     {
         adjacencyPreferences.Clear();
 
         if (newPreferences != null)
             adjacencyPreferences.AddRange(newPreferences);
+
+        RefreshAdjacencyIcons();
+    }
+
+    private bool MatchesRequirements(RoomSlot room)
+    {
+        for (int i = 0; i < requirements.Count; i++)
+        {
+            switch (requirements[i])
+            {
+                case GuestRequirement.HatesDirtyRoom:
+                    if (room.HasTrait(RoomTrait.Dirty))
+                        return false;
+                    break;
+            }
+        }
+
+        return true;
     }
 
     private bool MatchesAdjacencyPreferences(RoomSlot room)
@@ -558,7 +659,7 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
                     break;
 
                 case GuestAdjacencyPreferenceType.HatesLoudNeighbor:
-                    if (HasAdjacentGuestWithBehavior(noiseRooms, GuestBehaviorTrait.Noisy))
+                    if (HasAdjacentLoudGuest(noiseRooms))
                         return false;
                     break;
 
@@ -607,11 +708,42 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
         if (newTraits != null)
             behaviorTraits.AddRange(newTraits);
+
+        RefreshBehaviorIcons();
+    }
+
+    public void SetRequirements(List<GuestRequirement> newRequirements)
+    {
+        requirements.Clear();
+
+        if (newRequirements != null)
+            requirements.AddRange(newRequirements);
+
+        RefreshRequirementIcons();
     }
 
     public bool HasBehaviorTrait(GuestBehaviorTrait trait)
     {
         return behaviorTraits.Contains(trait);
+    }
+
+    private bool HasAdjacentLoudGuest(List<RoomSlot> rooms)
+    {
+        for (int i = 0; i < rooms.Count; i++)
+        {
+            GuestCard card = rooms[i].CurrentCard;
+
+            if (card == null)
+                continue;
+
+            if (card.HasBehaviorTrait(GuestBehaviorTrait.Parties))
+                return true;
+
+            if (card.HasBehaviorTrait(GuestBehaviorTrait.Snores))
+                return true;
+        }
+
+        return false;
     }
 
     // Rebuilds the floor preference icons on the guest card.

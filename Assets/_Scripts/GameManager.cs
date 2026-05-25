@@ -429,6 +429,7 @@ public class GameManager : MonoBehaviour
         newCard.SetPreferredFloorPreferences(guestData.preferredFloorPreferences);
         newCard.SetAdjacencyPreferences(guestData.adjacencyPreferences);
         newCard.SetBehaviorTraits(guestData.behaviorTraits);
+        newCard.SetRequirements(guestData.requirements);
 
         return newCard;
     }

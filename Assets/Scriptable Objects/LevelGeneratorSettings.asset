@@ -22,7 +22,7 @@ MonoBehaviour:
   maxTraitsPerRoom: 3
   minPreferencesPerGuest: 1
   maxPreferencesPerGuest: 3
-  allowedTraits: 000000000100000002000000030000000600000005000000
+  allowedTraits: 0000000001000000020000000300000006000000050000000900000008000000
   possibleGuestNames:
   - Alex
   - Jordan

@@ -1,5 +1,11 @@
 public enum GuestBehaviorTrait
 {
-    Noisy,
-    Smokes
+    Parties,
+    Smokes,
+    Snores
+}
+
+public enum GuestRequirement
+{
+    HatesDirtyRoom
 }

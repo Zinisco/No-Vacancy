@@ -1,46 +1,43 @@
 fileFormatVersion: 2
-guid: a2d58a11e6239b3458ad31b49adab7b6
+guid: 8f99ab179a0c8034f93f85c45dc47dcc
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 689283645380311244
-    second: sunset_0
+      213: -3195508530567585233
+    second: wet-clean_0
   - first:
-      213: -8505455023878367678
-    second: sunset_1
+      213: -7116559359732798391
+    second: wet-clean_1
   - first:
-      213: -854100238237632227
-    second: sunset_2
+      213: 340441475956618592
+    second: wet-clean_2
   - first:
-      213: -2156744897565133147
-    second: sunset_3
+      213: 5794991367101307603
+    second: wet-clean_3
   - first:
-      213: -2833390591846474745
-    second: sunset_4
+      213: -5815285397566634414
+    second: wet-clean_4
   - first:
-      213: 5956900105284652418
-    second: sunset_5
+      213: -1626339690257637351
+    second: wet-clean_5
   - first:
-      213: -4025454033673492792
-    second: sunset_6
+      213: -8009812804463013833
+    second: wet-clean_6
   - first:
-      213: -4277862926615721614
-    second: sunset_7
+      213: 1510108493563431835
+    second: wet-clean_7
   - first:
-      213: 1230888676982501851
-    second: sunset_8
+      213: -5987089883185827747
+    second: wet-clean_8
   - first:
-      213: 6051887719750176620
-    second: sunset_9
+      213: -8559460487553560567
+    second: wet-clean_9
   - first:
-      213: -435457075292422645
-    second: sunset_10
+      213: 2046086639951769184
+    second: wet-clean_10
   - first:
-      213: -7095832354293990500
-    second: sunset_11
-  - first:
-      213: 2903120931019883031
-    second: sunset_12
+      213: 7467456656326187470
+    second: wet-clean_11
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -136,13 +133,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: sunset_0
+      name: wet-clean_0
       rect:
         serializedVersion: 2
-        x: 145
-        y: 342
-        width: 41
-        height: 41
+        x: 40
+        y: 156
+        width: 412
+        height: 272
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -151,20 +148,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cc83160d2d3d09900800000000000000
-      internalID: 689283645380311244
+      spriteID: f22e9c60ce547a3d0800000000000000
+      internalID: -3195508530567585233
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sunset_1
+      name: wet-clean_1
       rect:
         serializedVersion: 2
-        x: 247
-        y: 375
-        width: 18
-        height: 50
+        x: 117
+        y: 418
+        width: 81
+        height: 81
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -173,20 +170,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2461ba838bd86f980800000000000000
-      internalID: -8505455023878367678
+      spriteID: 94c252ca7f6ec3d90800000000000000
+      internalID: -7116559359732798391
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sunset_2
+      name: wet-clean_2
       rect:
         serializedVersion: 2
-        x: 326
-        y: 342
-        width: 41
-        height: 41
+        x: 419
+        y: 425
+        width: 63
+        height: 63
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -195,20 +192,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d19f449cb50a524f0800000000000000
-      internalID: -854100238237632227
+      spriteID: 0653439f7bd79b400800000000000000
+      internalID: 340441475956618592
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sunset_3
+      name: wet-clean_3
       rect:
         serializedVersion: 2
-        x: 63
-        y: 231
-        width: 386
-        height: 130
+        x: 26
+        y: 107
+        width: 33
+        height: 19
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -217,20 +214,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5a67e7d41f3b112e0800000000000000
-      internalID: -2156744897565133147
+      spriteID: 3da5788f1f1fb6050800000000000000
+      internalID: 5794991367101307603
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sunset_4
+      name: wet-clean_4
       rect:
         serializedVersion: 2
-        x: 15
-        y: 183
-        width: 194
-        height: 18
+        x: 57
+        y: 123
+        width: 19
+        height: 34
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -239,20 +236,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 70c9e07c446cda8d0800000000000000
-      internalID: -2833390591846474745
+      spriteID: 256468addb4fb4fa0800000000000000
+      internalID: -5815285397566634414
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sunset_5
+      name: wet-clean_5
       rect:
         serializedVersion: 2
-        x: 223
-        y: 183
-        width: 66
-        height: 18
+        x: 73
+        y: 107
+        width: 34
+        height: 19
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -261,20 +258,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 28d8af1b5192ba250800000000000000
-      internalID: 5956900105284652418
+      spriteID: 910231e1ba41e69e0800000000000000
+      internalID: -1626339690257637351
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sunset_6
+      name: wet-clean_6
       rect:
         serializedVersion: 2
-        x: 303
-        y: 183
-        width: 194
-        height: 18
+        x: 133
+        y: 23
+        width: 236
+        height: 343
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -283,20 +280,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8c66a3752e6b228c0800000000000000
-      internalID: -4025454033673492792
+      spriteID: 7305b9031bd67d090800000000000000
+      internalID: -8009812804463013833
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sunset_7
+      name: wet-clean_7
       rect:
         serializedVersion: 2
-        x: 15
-        y: 135
-        width: 106
-        height: 18
+        x: 57
+        y: 76
+        width: 19
+        height: 33
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -305,20 +302,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 279c145555af1a4c0800000000000000
-      internalID: -4277862926615721614
+      spriteID: b9b062b8cabf4f410800000000000000
+      internalID: 1510108493563431835
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sunset_8
+      name: wet-clean_8
       rect:
         serializedVersion: 2
-        x: 135
-        y: 135
-        width: 242
-        height: 18
+        x: 436
+        y: 61
+        width: 19
+        height: 33
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -327,20 +324,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bd1b79deabef41110800000000000000
-      internalID: 1230888676982501851
+      spriteID: d50bf52e87599eca0800000000000000
+      internalID: -5987089883185827747
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sunset_9
+      name: wet-clean_9
       rect:
         serializedVersion: 2
-        x: 391
-        y: 135
-        width: 106
-        height: 18
+        x: 405
+        y: 44
+        width: 34
+        height: 19
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -349,20 +346,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c6f024c11df9cf350800000000000000
-      internalID: 6051887719750176620
+      spriteID: 900d06a5900b63980800000000000000
+      internalID: -8559460487553560567
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sunset_10
+      name: wet-clean_10
       rect:
         serializedVersion: 2
-        x: 15
-        y: 87
-        width: 194
-        height: 18
+        x: 436
+        y: 13
+        width: 19
+        height: 34
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -371,20 +368,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b0eb340e812f4f9f0800000000000000
-      internalID: -435457075292422645
+      spriteID: 06e6ff955f8256c10800000000000000
+      internalID: 2046086639951769184
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: sunset_11
+      name: wet-clean_11
       rect:
         serializedVersion: 2
-        x: 223
-        y: 87
-        width: 66
-        height: 18
+        x: 453
+        y: 44
+        width: 33
+        height: 19
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -393,30 +390,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c9b3590b11a868d90800000000000000
-      internalID: -7095832354293990500
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: sunset_12
-      rect:
-        serializedVersion: 2
-        x: 303
-        y: 87
-        width: 194
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7120179fa15f94820800000000000000
-      internalID: 2903120931019883031
+      spriteID: ec9d2ffb34cb1a760800000000000000
+      internalID: 7467456656326187470
       vertices: []
       indices: 
       edges: []
@@ -435,19 +410,18 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      sunset_0: 689283645380311244
-      sunset_1: -8505455023878367678
-      sunset_10: -435457075292422645
-      sunset_11: -7095832354293990500
-      sunset_12: 2903120931019883031
-      sunset_2: -854100238237632227
-      sunset_3: -2156744897565133147
-      sunset_4: -2833390591846474745
-      sunset_5: 5956900105284652418
-      sunset_6: -4025454033673492792
-      sunset_7: -4277862926615721614
-      sunset_8: 1230888676982501851
-      sunset_9: 6051887719750176620
+      wet-clean_0: -3195508530567585233
+      wet-clean_1: -7116559359732798391
+      wet-clean_10: 2046086639951769184
+      wet-clean_11: 7467456656326187470
+      wet-clean_2: 340441475956618592
+      wet-clean_3: 5794991367101307603
+      wet-clean_4: -5815285397566634414
+      wet-clean_5: -1626339690257637351
+      wet-clean_6: -8009812804463013833
+      wet-clean_7: 1510108493563431835
+      wet-clean_8: -5987089883185827747
+      wet-clean_9: -8559460487553560567
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

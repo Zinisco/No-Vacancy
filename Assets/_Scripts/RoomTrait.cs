@@ -1,11 +1,13 @@
 public enum RoomTrait
 {
-    OneBed,
-    TwoBeds,
+    QueenBed,
+    KingBed,
     Luxury,
-    Budget,
+    Cheap,
     Scenic,
     NearElevator,
     NearPool,
-    Balcony
+    Balcony,
+    PetFriendly,
+    Dirty
 }

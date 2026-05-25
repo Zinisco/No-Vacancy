@@ -4,11 +4,11 @@ public static class RoomTraitRules
 {
     private static readonly Dictionary<RoomTrait, HashSet<RoomTrait>> conflicts = new()
     {
-        { RoomTrait.OneBed,       new HashSet<RoomTrait> { RoomTrait.TwoBeds } },
-        { RoomTrait.TwoBeds,      new HashSet<RoomTrait> { RoomTrait.OneBed } },
+        { RoomTrait.KingBed,       new HashSet<RoomTrait> { RoomTrait.QueenBed } },
+        { RoomTrait.QueenBed,      new HashSet<RoomTrait> { RoomTrait.KingBed } },
 
-        { RoomTrait.Budget,       new HashSet<RoomTrait> { RoomTrait.Luxury } },
-        { RoomTrait.Luxury,       new HashSet<RoomTrait> { RoomTrait.Budget } },
+        { RoomTrait.Cheap,       new HashSet<RoomTrait> { RoomTrait.Luxury } },
+        { RoomTrait.Luxury,       new HashSet<RoomTrait> { RoomTrait.Cheap } },
     };
 
     public static bool ConflictsWithAny(RoomTrait candidate, List<RoomTrait> existingTraits)
