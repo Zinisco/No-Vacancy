@@ -82,11 +82,15 @@ public static class LevelGenerator
     {
         List<RoomTrait> pool = new();
 
-        for (int i = 0; i < settings.allowedTraits.Count; i++)
-        {
-            RoomTrait trait = settings.allowedTraits[i];
+        if (settings.ruleset == null || settings.ruleset.allowedTraits == null)
+            return pool;
 
-            // This trait is now derived from layout, not randomly generated.
+        List<RoomTrait> traitSource = settings.ruleset.allowedTraits;
+
+        for (int i = 0; i < traitSource.Count; i++)
+        {
+            RoomTrait trait = traitSource[i];
+
             if (trait == RoomTrait.NearElevator)
                 continue;
 
@@ -231,8 +235,16 @@ public static class LevelGenerator
             {
                 guestName = i < shuffledNames.Count ? shuffledNames[i] : $"Guest {i + 1}",
                 preferredTraits = GenerateGuestPreferencesFromRoom(settings, sourceRoom),
-                preferredFloorPreferences = GenerateGuestFloorPreferences(settings, sourceRoom, actualRooms)
+                preferredFloorPreferences =
+                    settings.ruleset != null && settings.ruleset.allowFloorPreferences
+                        ? GenerateGuestFloorPreferences(settings, sourceRoom, actualRooms)
+                        : new List<FloorPreference>()
             };
+
+            if (settings.ruleset != null)
+            {
+                ApplyRulesetExtras(settings, guest, guests);
+            }
 
             guests.Add(guest);
         }
@@ -308,6 +320,56 @@ public static class LevelGenerator
         }
 
         return result;
+    }
+
+    private static void ApplyRulesetExtras(
+    LevelGeneratorSettings settings,
+    GeneratedGuestData guest,
+    List<GeneratedGuestData> existingGuests)
+    {
+        LevelRuleset ruleset = settings.ruleset;
+        if (ruleset == null)
+            return;
+
+        if (ruleset.allowBehaviorTraits && ruleset.allowedBehaviors != null && ruleset.allowedBehaviors.Count > 0)
+        {
+            if (Random.value < 0.35f)
+            {
+                GuestBehaviorTrait behavior = ruleset.allowedBehaviors[Random.Range(0, ruleset.allowedBehaviors.Count)];
+                guest.behaviorTraits.Add(behavior);
+            }
+        }
+
+        if (ruleset.allowRequirements && ruleset.allowedRequirements != null && ruleset.allowedRequirements.Count > 0)
+        {
+            if (Random.value < 0.35f)
+            {
+                GuestRequirement requirement = ruleset.allowedRequirements[Random.Range(0, ruleset.allowedRequirements.Count)];
+                guest.requirements.Add(requirement);
+            }
+        }
+
+        if (ruleset.allowAdjacencyRules)
+        {
+            if (Random.value < 0.25f)
+            {
+                guest.adjacencyPreferences.Add(new GuestAdjacencyPreference
+                {
+                    type = GuestAdjacencyPreferenceType.HatesLoudNeighbor
+                });
+            }
+
+            if (existingGuests.Count > 0 && Random.value < 0.2f)
+            {
+                GeneratedGuestData target = existingGuests[Random.Range(0, existingGuests.Count)];
+
+                guest.adjacencyPreferences.Add(new GuestAdjacencyPreference
+                {
+                    type = GuestAdjacencyPreferenceType.WantsNamedGuestNeighbor,
+                    targetGuestName = target.guestName
+                });
+            }
+        }
     }
 
     private static void Shuffle<T>(List<T> list)

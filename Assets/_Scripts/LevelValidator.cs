@@ -106,23 +106,40 @@ public static class LevelValidator
     private static int CountSolutions(List<GeneratedRoomData> rooms, List<GeneratedGuestData> guests, int stopAfter)
     {
         bool[] usedRooms = new bool[rooms.Count];
+        int[] guestToRoom = new int[guests.Count];
+
+        for (int i = 0; i < guestToRoom.Length; i++)
+            guestToRoom[i] = -1;
+
         int topFloor = GetTopFloorIndex(rooms);
         List<int> guestOrder = BuildMostConstrainedGuestOrder(rooms, guests, topFloor);
 
-        return CountSolutionsRecursive(rooms, guests, guestOrder, 0, usedRooms, stopAfter, topFloor);
+        return CountSolutionsRecursive(
+            rooms,
+            guests,
+            guestOrder,
+            0,
+            usedRooms,
+            guestToRoom,
+            stopAfter,
+            topFloor
+        );
     }
 
     private static int CountSolutionsRecursive(
-        List<GeneratedRoomData> rooms,
-        List<GeneratedGuestData> guests,
-        List<int> guestOrder,
-        int guestDepth,
-        bool[] usedRooms,
-        int stopAfter,
-        int topFloor)
+    List<GeneratedRoomData> rooms,
+    List<GeneratedGuestData> guests,
+    List<int> guestOrder,
+    int guestDepth,
+    bool[] usedRooms,
+    int[] guestToRoom,
+    int stopAfter,
+    int topFloor)
     {
         if (guestDepth >= guestOrder.Count)
-            return 1;
+        {
+            return FullArrangementIsValid(rooms, guests, guestToRoom) ? 1 : 0;
+        }
 
         int guestIndex = guestOrder[guestDepth];
         GeneratedGuestData guest = guests[guestIndex];
@@ -139,15 +156,20 @@ public static class LevelValidator
 
             usedRooms[roomIndex] = true;
 
+            guestToRoom[guestIndex] = roomIndex;
+
             totalSolutions += CountSolutionsRecursive(
                 rooms,
                 guests,
                 guestOrder,
                 guestDepth + 1,
                 usedRooms,
+                guestToRoom,
                 stopAfter,
                 topFloor
             );
+
+            guestToRoom[guestIndex] = -1;
 
             usedRooms[roomIndex] = false;
 
@@ -203,6 +225,17 @@ public static class LevelValidator
                 return false;
         }
 
+        for (int i = 0; i < guest.requirements.Count; i++)
+        {
+            switch (guest.requirements[i])
+            {
+                case GuestRequirement.HatesDirtyRoom:
+                    if (room.traits.Contains(RoomTrait.Dirty))
+                        return false;
+                    break;
+            }
+        }
+
         return true;
     }
 
@@ -223,6 +256,92 @@ public static class LevelValidator
                 return false;
         }
     }
+
+    private static bool FullArrangementIsValid(
+    List<GeneratedRoomData> rooms,
+    List<GeneratedGuestData> guests,
+    int[] guestToRoom)
+    {
+        for (int guestIndex = 0; guestIndex < guests.Count; guestIndex++)
+        {
+            GeneratedGuestData guest = guests[guestIndex];
+            GeneratedRoomData room = rooms[guestToRoom[guestIndex]];
+
+            foreach (GuestAdjacencyPreference pref in guest.adjacencyPreferences)
+            {
+                if (!AdjacencyPreferenceSatisfied(pref, guestIndex, room, rooms, guests, guestToRoom))
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool AdjacencyPreferenceSatisfied(
+    GuestAdjacencyPreference pref,
+    int guestIndex,
+    GeneratedRoomData guestRoom,
+    List<GeneratedRoomData> rooms,
+    List<GeneratedGuestData> guests,
+    int[] guestToRoom)
+    {
+        for (int otherGuestIndex = 0; otherGuestIndex < guests.Count; otherGuestIndex++)
+        {
+            if (otherGuestIndex == guestIndex)
+                continue;
+
+            GeneratedGuestData otherGuest = guests[otherGuestIndex];
+            GeneratedRoomData otherRoom = rooms[guestToRoom[otherGuestIndex]];
+
+            bool adjacent = AreRoomsAdjacent(guestRoom, otherRoom);
+            bool noiseAdjacent = AreRoomsNoiseAdjacent(guestRoom, otherRoom);
+
+            switch (pref.type)
+            {
+                case GuestAdjacencyPreferenceType.HatesSmokingNeighbor:
+                    if (adjacent && otherGuest.behaviorTraits.Contains(GuestBehaviorTrait.Smokes))
+                        return false;
+                    break;
+
+                case GuestAdjacencyPreferenceType.HatesLoudNeighbor:
+                    if (noiseAdjacent &&
+                        (otherGuest.behaviorTraits.Contains(GuestBehaviorTrait.Parties) ||
+                         otherGuest.behaviorTraits.Contains(GuestBehaviorTrait.Snores)))
+                        return false;
+                    break;
+
+                case GuestAdjacencyPreferenceType.WantsNamedGuestNeighbor:
+                    if (otherGuest.guestName == pref.targetGuestName && adjacent)
+                        return true;
+                    break;
+            }
+        }
+
+        if (pref.type == GuestAdjacencyPreferenceType.WantsNamedGuestNeighbor)
+            return false;
+
+        return true;
+    }
+
+    private static bool AreRoomsAdjacent(GeneratedRoomData a, GeneratedRoomData b)
+    {
+        if (a.floorIndex != b.floorIndex)
+            return false;
+
+        return Mathf.Abs(a.columnIndex - b.columnIndex) == 1;
+    }
+
+    private static bool AreRoomsNoiseAdjacent(GeneratedRoomData a, GeneratedRoomData b)
+    {
+        int floorDifference = Mathf.Abs(a.floorIndex - b.floorIndex);
+        int columnDifference = Mathf.Abs(a.columnIndex - b.columnIndex);
+
+        bool horizontalNeighbor = floorDifference == 0 && columnDifference == 1;
+        bool verticalNeighbor = floorDifference == 1 && columnDifference == 0;
+
+        return horizontalNeighbor || verticalNeighbor;
+    }
+
 
     private static int GetTopFloorIndex(List<GeneratedRoomData> rooms)
     {

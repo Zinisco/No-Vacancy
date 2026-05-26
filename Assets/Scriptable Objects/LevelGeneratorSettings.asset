@@ -14,7 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelGeneratorSettings
   outputFolder: Assets/Levels
   levelNamePrefix: GeneratedLevel
-  floorCount: 3
+  ruleset:
+    allowFloorPreferences: 0
+    allowAdjacencyRules: 0
+    allowBehaviorTraits: 0
+    allowRequirements: 0
+    allowedTraits: 00000000010000000400000008000000
+    allowedBehaviors: 
+    allowedRequirements: 
+  targetComplexity: 0
+  floorCount: 1
   roomsPerFloor: 4
   topFloorFirst: 0
   elevatorColumnIndex: 2
@@ -22,7 +31,6 @@ MonoBehaviour:
   maxTraitsPerRoom: 3
   minPreferencesPerGuest: 1
   maxPreferencesPerGuest: 3
-  allowedTraits: 0000000001000000020000000300000006000000050000000900000008000000
   possibleGuestNames:
   - Alex
   - Jordan

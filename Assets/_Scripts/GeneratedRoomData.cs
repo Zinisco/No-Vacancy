@@ -14,6 +14,10 @@ public class GeneratedRoomData
 public class GeneratedGuestData
 {
     public string guestName;
-    public List<RoomTrait> preferredTraits = new List<RoomTrait>();
-    public List<FloorPreference> preferredFloorPreferences = new List<FloorPreference>();
+    public List<RoomTrait> preferredTraits = new();
+    public List<FloorPreference> preferredFloorPreferences = new();
+
+    public List<GuestAdjacencyPreference> adjacencyPreferences = new();
+    public List<GuestBehaviorTrait> behaviorTraits = new();
+    public List<GuestRequirement> requirements = new();
 }

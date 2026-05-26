@@ -8,6 +8,12 @@ public class LevelGeneratorSettings : ScriptableObject
     public string outputFolder = "Assets/Levels";
     public string levelNamePrefix = "GeneratedLevel";
 
+    [Header("Ruleset")]
+    public LevelRuleset ruleset = new LevelRuleset();
+
+    [Header("Difficulty")]
+    public PuzzleComplexity targetComplexity = PuzzleComplexity.Intro;
+
     [Header("Layout")]
     public int floorCount = 3;
     public int roomsPerFloor = 3;
@@ -21,9 +27,6 @@ public class LevelGeneratorSettings : ScriptableObject
     public int maxTraitsPerRoom = 4;
     public int minPreferencesPerGuest = 1;
     public int maxPreferencesPerGuest = 3;
-
-    [Header("Trait Pool")]
-    public List<RoomTrait> allowedTraits = new List<RoomTrait>();
 
     [Header("Names")]
     public List<string> possibleGuestNames = new List<string>();

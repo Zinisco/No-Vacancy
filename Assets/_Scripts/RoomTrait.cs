@@ -4,10 +4,11 @@ public enum RoomTrait
     KingBed,
     Luxury,
     Cheap,
-    Scenic,
+    ScenicView,
     NearElevator,
     NearPool,
     Balcony,
     PetFriendly,
-    Dirty
+    Dirty,
+    HotTub
 }

@@ -12,7 +12,10 @@ public static class LevelConfigGenerator
         if (settings.floorCount <= 0 || settings.roomsPerFloor <= 0)
             return null;
 
-        if (settings.allowedTraits == null || settings.allowedTraits.Count == 0)
+        if (settings.ruleset == null)
+            return null;
+
+        if (settings.ruleset.allowedTraits == null || settings.ruleset.allowedTraits.Count == 0)
             return null;
 
         if (settings.possibleGuestNames == null || settings.possibleGuestNames.Count == 0)
@@ -49,7 +52,10 @@ public static class LevelConfigGenerator
                 {
                     guestName = guest.guestName,
                     preferredTraits = new List<RoomTrait>(guest.preferredTraits),
-                    preferredFloorPreferences = new List<FloorPreference>(guest.preferredFloorPreferences)
+                    preferredFloorPreferences = new List<FloorPreference>(guest.preferredFloorPreferences),
+                    adjacencyPreferences = new List<GuestAdjacencyPreference>(guest.adjacencyPreferences),
+                    behaviorTraits = new List<GuestBehaviorTrait>(guest.behaviorTraits),
+                    requirements = new List<GuestRequirement>(guest.requirements)
                 };
                 newLevel.guests.Add(guestEntry);
             }
