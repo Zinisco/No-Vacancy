@@ -297,6 +297,7 @@ GameObject:
   - component: {fileID: 3052674574593314869}
   - component: {fileID: 2990225986877796226}
   - component: {fileID: 1234489911368371100}
+  - component: {fileID: -2877907494425194662}
   m_Layer: 5
   m_Name: GuestCard
   m_TagString: Untagged
@@ -420,6 +421,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GuestCard
   nameText: {fileID: 6561832609982371154}
   button: {fileID: 2990225986877796226}
+  requirements: 
   adjacencyPreferences: []
   preferredTraits: 
   behaviorTraits: 
@@ -427,6 +429,15 @@ MonoBehaviour:
   traitIconDatabase: {fileID: 11400000, guid: 204cb177f883cdc418c8b085774a1720, type: 2}
   traitIconContainer: {fileID: 4274667019411445341}
   traitIconPrefab: {fileID: 2842896077947265197, guid: abc94ca7871dd594c92550d371c226d9, type: 3}
+  behaviorIconDatabase: {fileID: 0}
+  behaviorIconContainer: {fileID: 0}
+  behaviorIconPrefab: {fileID: 0}
+  requirementIconDatabase: {fileID: 0}
+  requirementIconContainer: {fileID: 0}
+  requirementIconPrefab: {fileID: 0}
+  adjacencyIconDatabase: {fileID: 0}
+  adjacencyIconContainer: {fileID: 0}
+  adjacencyIconPrefab: {fileID: 0}
   floorPreferenceIconDatabase: {fileID: 11400000, guid: 044daf952c6196f45a8686e98cf5c77f, type: 2}
   floorPreferenceIconContainer: {fileID: 8897544080043443785}
   floorPreferenceIconPrefab: {fileID: 833309687118496891}
@@ -437,6 +448,18 @@ MonoBehaviour:
   hoverRise: 10
   hoverScale: 1.02
   handPoseLerpSpeed: 14
+--- !u!225 &-2877907494425194662
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7283758928544922853}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &8203827272949116550
 GameObject:
   m_ObjectHideFlags: 0

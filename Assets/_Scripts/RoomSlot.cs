@@ -6,7 +6,13 @@ using UnityEngine.UI;
 
 // RoomSlot represents one space on the hotel board.
 // This could be a normal guest room or an elevator slot.
-public class RoomSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+public class RoomSlot : MonoBehaviour,
+    IPointerClickHandler,
+    IPointerEnterHandler,
+    IPointerExitHandler,
+    IBeginDragHandler,
+    IDragHandler,
+    IEndDragHandler
 {
     [Header("Slot Data")]
 
@@ -338,5 +344,29 @@ public class RoomSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandle
                 }
             }
         }
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        if (CurrentCard == null)
+            return;
+
+        CurrentCard.OnBeginDrag(eventData);
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (CurrentCard == null)
+            return;
+
+        CurrentCard.OnDrag(eventData);
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        if (CurrentCard == null)
+            return;
+
+        CurrentCard.OnEndDrag(eventData);
     }
 }

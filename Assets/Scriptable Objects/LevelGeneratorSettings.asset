@@ -19,7 +19,7 @@ MonoBehaviour:
     allowAdjacencyRules: 0
     allowBehaviorTraits: 0
     allowRequirements: 0
-    allowedTraits: 00000000010000000400000008000000
+    allowedTraits: 0000000001000000040000000a000000
     allowedBehaviors: 
     allowedRequirements: 
   targetComplexity: 0
@@ -28,9 +28,9 @@ MonoBehaviour:
   topFloorFirst: 0
   elevatorColumnIndex: 2
   minTraitsPerRoom: 1
-  maxTraitsPerRoom: 3
+  maxTraitsPerRoom: 1
   minPreferencesPerGuest: 1
-  maxPreferencesPerGuest: 3
+  maxPreferencesPerGuest: 2
   possibleGuestNames:
   - Alex
   - Jordan

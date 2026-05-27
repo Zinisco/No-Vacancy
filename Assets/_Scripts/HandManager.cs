@@ -17,7 +17,7 @@ public class HandManager : MonoBehaviour
     [Header("Settings")]
 
     // The default maximum number of cards the player can hold.
-    [SerializeField] private int baseMaxHandSize = 8;
+    [SerializeField] private int baseMaxHandSize = 10;
 
     [Header("Fan Layout")]
 

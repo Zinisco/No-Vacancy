@@ -13,7 +13,13 @@ using UnityEngine.UI;
 // - hover/selected visuals
 // - hand fan positioning
 // - checking if the guest matches a room
-public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+public class GuestCard : MonoBehaviour,
+    IPointerEnterHandler,
+    IPointerExitHandler,
+    IPointerClickHandler,
+    IBeginDragHandler,
+    IDragHandler,
+    IEndDragHandler
 {
     [Header("UI")]
 
@@ -159,6 +165,10 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     // Target rotation for this card in the hand fan.
     private float targetHandRotationZ;
 
+    private Canvas rootCanvas;
+    private CanvasGroup canvasGroup;
+    private Transform dragOriginalParent;
+
     private void Awake()
     {
         // Cache this card's root RectTransform.
@@ -173,6 +183,12 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         targetVisualScale = Vector3.one;
         targetHandAnchoredPos = Vector2.zero;
         targetHandRotationZ = 0f;
+
+        rootCanvas = GetComponentInParent<Canvas>();
+        canvasGroup = GetComponent<CanvasGroup>();
+
+        if (canvasGroup == null)
+            canvasGroup = gameObject.AddComponent<CanvasGroup>();
     }
 
     private void Update()
@@ -306,6 +322,8 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
         ClearHandPoseInstant();
         RefreshVisualTargets(true);
+
+        transform.localScale = Vector3.one;
     }
 
     // Called when the mouse enters the card.
@@ -782,5 +800,50 @@ public class GuestCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
                 }
             }
         }
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        if (gameManager == null)
+            return;
+
+        isHovered = false;
+        isSelected = false;
+        RefreshVisualTargets(true);
+
+        dragOriginalParent = transform.parent;
+
+        SetHandPoseLerpEnabled(false);
+
+        if (canvasGroup != null)
+            canvasGroup.blocksRaycasts = false;
+
+        if (rootCanvas == null)
+            rootCanvas = GetComponentInParent<Canvas>();
+
+        if (rootCanvas != null)
+            transform.SetParent(rootCanvas.transform, true);
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (rootRect == null)
+            return;
+
+        rootRect.position = eventData.position;
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        if (canvasGroup != null)
+            canvasGroup.blocksRaycasts = true;
+
+        RoomSlot targetRoom = null;
+
+        if (eventData.pointerCurrentRaycast.gameObject != null)
+            targetRoom = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<RoomSlot>();
+
+        if (gameManager != null)
+            gameManager.OnGuestCardDropped(this, targetRoom);
     }
 }
