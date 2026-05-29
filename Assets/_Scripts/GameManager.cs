@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -882,8 +883,7 @@ public class GameManager : MonoBehaviour
 
         Log($"Level complete! Hotel Rating: {stars} Stars ({satisfiedGuests}/{totalGuests} guests satisfied)");
 
-        // Later:
-        // gameUIController.ShowLevelCompletePanel(stars, satisfiedGuests, totalGuests);
+        gameUIController?.ShowLevelCompletePanel(stars, satisfiedGuests, totalGuests);
         // Unlock next level here.
     }
 
@@ -989,6 +989,24 @@ public class GameManager : MonoBehaviour
         }
 
         card.SetHandPoseLerpEnabled(true);
+    }
+
+    public void OnRetryButtonPressed()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void OnContinueButtonPressed()
+    {
+        int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
+
+        if (nextSceneIndex >= SceneManager.sceneCountInBuildSettings)
+        {
+            Log("No next level yet.");
+            return;
+        }
+
+        SceneManager.LoadScene(nextSceneIndex);
     }
 
     #endregion

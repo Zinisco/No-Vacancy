@@ -39,26 +39,26 @@ MonoBehaviour:
     columnIndex: 4
     traits: 01000000
   guests:
-  - guestName: Chris
-    preferredTraits: 00000000
-    preferredFloorPreferences: 
-    adjacencyPreferences: []
-    behaviorTraits: 
-    requirements: 
   - guestName: Avery
     preferredTraits: 050000000a000000
     preferredFloorPreferences: 
     adjacencyPreferences: []
     behaviorTraits: 
     requirements: 
-  - guestName: Blake
-    preferredTraits: 05000000
+  - guestName: Chris
+    preferredTraits: 00000000
     preferredFloorPreferences: 
     adjacencyPreferences: []
     behaviorTraits: 
     requirements: 
   - guestName: Taylor
     preferredTraits: 01000000
+    preferredFloorPreferences: 
+    adjacencyPreferences: []
+    behaviorTraits: 
+    requirements: 
+  - guestName: Blake
+    preferredTraits: 05000000
     preferredFloorPreferences: 
     adjacencyPreferences: []
     behaviorTraits: 
