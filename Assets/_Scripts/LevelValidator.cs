@@ -233,6 +233,11 @@ public static class LevelValidator
                     if (room.traits.Contains(RoomTrait.Dirty))
                         return false;
                     break;
+
+                case GuestRequirement.HatesElevatorNoise:
+                    if (room.traits.Contains(RoomTrait.NearElevator))
+                        return false;
+                    break;
             }
         }
 

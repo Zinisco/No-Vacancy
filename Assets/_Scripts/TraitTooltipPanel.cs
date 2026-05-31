@@ -18,6 +18,11 @@ public class TraitTooltipPanel : MonoBehaviour
     [Header("Icons")]
     [SerializeField] private RoomTraitIconDatabase traitIconDatabase;
     [SerializeField] private FloorPreferenceIconDatabase floorPreferenceIconDatabase;
+    [SerializeField] private GuestBehaviorIconDatabase behaviorIconDatabase;
+    [SerializeField] private GuestRequirementIconDatabase requirementIconDatabase;
+    [SerializeField] private GuestAdjacencyPreferenceIconDatabase adjacencyIconDatabase;
+
+    private const int MaxGuestTooltipRows = 5;
 
     private void Awake()
     {
@@ -48,11 +53,14 @@ public class TraitTooltipPanel : MonoBehaviour
             return;
 
         ShowGuestContent(
-            guest.DisplayName,
-            "Guest Preferences",
-            guest.PreferredTraits,
-            guest.PreferredFloorPreferences
-        );
+    guest.DisplayName,
+    "Guest Preferences",
+    guest.PreferredTraits,
+    guest.PreferredFloorPreferences,
+    guest.BehaviorTraits,
+    guest.Requirements,
+    guest.AdjacencyPreferences
+);
     }
 
     private void ShowRoomContent(string title, string subtitle, IReadOnlyList<RoomTrait> traits)
@@ -70,35 +78,33 @@ public class TraitTooltipPanel : MonoBehaviour
     }
 
     private void ShowGuestContent(
-        string title,
-        string subtitle,
-        IReadOnlyList<RoomTrait> traits,
-        IReadOnlyList<FloorPreference> floorPreferences)
+    string title,
+    string subtitle,
+    IReadOnlyList<RoomTrait> traits,
+    IReadOnlyList<FloorPreference> floorPreferences,
+    IReadOnlyList<GuestBehaviorTrait> behaviorTraits,
+    IReadOnlyList<GuestRequirement> requirements,
+    IReadOnlyList<GuestAdjacencyPreference> adjacencyPreferences)
     {
         ShowRoot(title, subtitle);
         ClearRows();
 
-        bool hasTraits = traits != null && traits.Count > 0;
-        bool hasFloorPrefs = floorPreferences != null && floorPreferences.Count > 0;
+        int added = 0;
 
-        if (!hasTraits && !hasFloorPrefs)
-            return;
+        for (int i = 0; traits != null && i < traits.Count && added < MaxGuestTooltipRows; i++, added++)
+            AddTraitRow(traits[i]);
 
-        if (hasTraits)
-        {
-            for (int i = 0; i < traits.Count; i++)
-            {
-                AddTraitRow(traits[i]);
-            }
-        }
+        for (int i = 0; floorPreferences != null && i < floorPreferences.Count && added < MaxGuestTooltipRows; i++, added++)
+            AddFloorPreferenceRow(floorPreferences[i]);
 
-        if (hasFloorPrefs)
-        {
-            for (int i = 0; i < floorPreferences.Count; i++)
-            {
-                AddFloorPreferenceRow(floorPreferences[i]);
-            }
-        }
+        for (int i = 0; behaviorTraits != null && i < behaviorTraits.Count && added < MaxGuestTooltipRows; i++, added++)
+            AddBehaviorRow(behaviorTraits[i]);
+
+        for (int i = 0; requirements != null && i < requirements.Count && added < MaxGuestTooltipRows; i++, added++)
+            AddRequirementRow(requirements[i]);
+
+        for (int i = 0; adjacencyPreferences != null && i < adjacencyPreferences.Count && added < MaxGuestTooltipRows; i++, added++)
+            AddAdjacencyRow(adjacencyPreferences[i]);
     }
 
     private void ShowRoot(string title, string subtitle)
@@ -126,6 +132,30 @@ public class TraitTooltipPanel : MonoBehaviour
         TooltipTraitRowUI row = Instantiate(rowPrefab, rowContainer);
         Sprite icon = floorPreferenceIconDatabase != null ? floorPreferenceIconDatabase.GetIcon(preference) : null;
         string label = FloorPreferenceUtility.GetDisplayName(preference);
+        row.SetData(icon, label);
+    }
+
+    private void AddBehaviorRow(GuestBehaviorTrait behavior)
+    {
+        TooltipTraitRowUI row = Instantiate(rowPrefab, rowContainer);
+        Sprite icon = behaviorIconDatabase != null ? behaviorIconDatabase.GetIcon(behavior) : null;
+        string label = behavior.ToString();
+        row.SetData(icon, label);
+    }
+
+    private void AddRequirementRow(GuestRequirement requirement)
+    {
+        TooltipTraitRowUI row = Instantiate(rowPrefab, rowContainer);
+        Sprite icon = requirementIconDatabase != null ? requirementIconDatabase.GetIcon(requirement) : null;
+        string label = GuestRequirementUtility.GetDisplayName(requirement);
+        row.SetData(icon, label);
+    }
+
+    private void AddAdjacencyRow(GuestAdjacencyPreference preference)
+    {
+        TooltipTraitRowUI row = Instantiate(rowPrefab, rowContainer);
+        Sprite icon = adjacencyIconDatabase != null ? adjacencyIconDatabase.GetIcon(preference.type) : null;
+        string label = preference.type.ToString();
         row.SetData(icon, label);
     }
 

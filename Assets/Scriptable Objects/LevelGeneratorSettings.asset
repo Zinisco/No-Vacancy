@@ -18,10 +18,10 @@ MonoBehaviour:
     allowFloorPreferences: 0
     allowAdjacencyRules: 0
     allowBehaviorTraits: 0
-    allowRequirements: 0
-    allowedTraits: 0000000001000000040000000a000000
+    allowRequirements: 1
+    allowedTraits: 0000000001000000
     allowedBehaviors: 
-    allowedRequirements: 
+    allowedRequirements: 01000000
   targetComplexity: 0
   floorCount: 1
   roomsPerFloor: 4

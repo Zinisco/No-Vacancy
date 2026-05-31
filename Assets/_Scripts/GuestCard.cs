@@ -32,6 +32,8 @@ public class GuestCard : MonoBehaviour,
     // List of basic requirements for this guest, such as needing a bed or a non-smoking room.
     [SerializeField] private List<GuestRequirement> requirements = new();
 
+    public IReadOnlyList<GuestRequirement> Requirements => requirements;
+
     // List of adjacency preferences for this guest, such as hating a smoking neighbor or wanting a specific guest next door
     [SerializeField] private List<GuestAdjacencyPreference> adjacencyPreferences = new();
     public IReadOnlyList<GuestAdjacencyPreference> AdjacencyPreferences => adjacencyPreferences;
@@ -53,31 +55,15 @@ public class GuestCard : MonoBehaviour,
     // Public read-only access to this guest's floor preferences.
     public IReadOnlyList<FloorPreference> PreferredFloorPreferences => preferredFloorPreferences;
 
-    [Header("Trait Icons")]
+    [Header("Main Guest Icons")]
+    [SerializeField] private Transform guestIconContainer;
+    [SerializeField] private GameObject guestIconPrefab;
+    [SerializeField] private int maxGuestIcons = 4;
 
-    // Database that converts RoomTrait values into sprites/icons.
     [SerializeField] private RoomTraitIconDatabase traitIconDatabase;
-
-    // Parent object where room trait icons are spawned.
-    [SerializeField] private Transform traitIconContainer;
-
-    // Prefab used for each room trait icon.
-    [SerializeField] private GameObject traitIconPrefab;
-
-    [Header("Behavior Icons")]
     [SerializeField] private GuestBehaviorIconDatabase behaviorIconDatabase;
-    [SerializeField] private Transform behaviorIconContainer;
-    [SerializeField] private GameObject behaviorIconPrefab;
-
-    [Header("Requirement Icons")]
     [SerializeField] private GuestRequirementIconDatabase requirementIconDatabase;
-    [SerializeField] private Transform requirementIconContainer;
-    [SerializeField] private GameObject requirementIconPrefab;
-
-    [Header("Adjacency Preference Icons")]
     [SerializeField] private GuestAdjacencyPreferenceIconDatabase adjacencyIconDatabase;
-    [SerializeField] private Transform adjacencyIconContainer;
-    [SerializeField] private GameObject adjacencyIconPrefab;
 
     [Header("Floor Preference Icons")]
 
@@ -248,11 +234,8 @@ public class GuestCard : MonoBehaviour,
         // Reset visuals and create icons.
         RefreshVisualTargets(true);
         SetHandPose(Vector2.zero, 0f, true);
-        RefreshTraitIcons();
+        RefreshMainGuestIcons();
         RefreshFloorPreferenceIcons();
-        RefreshBehaviorIcons();
-        RefreshRequirementIcons();
-        RefreshAdjacencyIcons();
     }
 
     // Sets whether this card is selected.
@@ -471,7 +454,7 @@ public class GuestCard : MonoBehaviour,
         if (newTraits != null)
             preferredTraits.AddRange(newTraits);
 
-        RefreshTraitIcons();
+        RefreshMainGuestIcons();
     }
 
     // Replaces this guest's preferred floor preferences.
@@ -485,100 +468,48 @@ public class GuestCard : MonoBehaviour,
         RefreshFloorPreferenceIcons();
     }
 
-    private void RefreshBehaviorIcons()
+    private void RefreshMainGuestIcons()
     {
-        if (behaviorIconContainer == null || behaviorIconPrefab == null || behaviorIconDatabase == null)
+        if (guestIconContainer == null || guestIconPrefab == null)
             return;
 
-        for (int i = behaviorIconContainer.childCount - 1; i >= 0; i--)
-            Destroy(behaviorIconContainer.GetChild(i).gameObject);
+        for (int i = guestIconContainer.childCount - 1; i >= 0; i--)
+            Destroy(guestIconContainer.GetChild(i).gameObject);
 
-        for (int i = 0; i < behaviorTraits.Count; i++)
+        int added = 0;
+
+        for (int i = 0; i < preferredTraits.Count && added < maxGuestIcons; i++)
         {
-            GameObject iconObj = Instantiate(behaviorIconPrefab, behaviorIconContainer);
-            Sprite iconSprite = behaviorIconDatabase.GetIcon(behaviorTraits[i]);
+            AddGuestIcon(traitIconDatabase.GetIcon(preferredTraits[i]));
+            added++;
+        }
 
-            TraitIconUI iconUI = iconObj.GetComponent<TraitIconUI>();
-            if (iconUI != null)
-                iconUI.SetSprite(iconSprite);
+        for (int i = 0; i < behaviorTraits.Count && added < maxGuestIcons; i++)
+        {
+            AddGuestIcon(behaviorIconDatabase.GetIcon(behaviorTraits[i]));
+            added++;
+        }
+
+        for (int i = 0; i < requirements.Count && added < maxGuestIcons; i++)
+        {
+            AddGuestIcon(requirementIconDatabase.GetIcon(requirements[i]));
+            added++;
+        }
+
+        for (int i = 0; i < adjacencyPreferences.Count && added < maxGuestIcons; i++)
+        {
+            AddGuestIcon(adjacencyIconDatabase.GetIcon(adjacencyPreferences[i].type));
+            added++;
         }
     }
 
-    private void RefreshRequirementIcons()
+    private void AddGuestIcon(Sprite sprite)
     {
-        if (requirementIconContainer == null || requirementIconPrefab == null || requirementIconDatabase == null)
-            return;
+        GameObject iconObj = Instantiate(guestIconPrefab, guestIconContainer);
 
-        for (int i = requirementIconContainer.childCount - 1; i >= 0; i--)
-            Destroy(requirementIconContainer.GetChild(i).gameObject);
-
-        for (int i = 0; i < requirements.Count; i++)
-        {
-            GameObject iconObj = Instantiate(requirementIconPrefab, requirementIconContainer);
-            Sprite iconSprite = requirementIconDatabase.GetIcon(requirements[i]);
-
-            TraitIconUI iconUI = iconObj.GetComponent<TraitIconUI>();
-            if (iconUI != null)
-                iconUI.SetSprite(iconSprite);
-        }
-    }
-
-    // Rebuilds the room trait icons on the guest card.
-    private void RefreshTraitIcons()
-    {
-        if (traitIconContainer == null || traitIconPrefab == null || traitIconDatabase == null)
-            return;
-
-        // Clear old icons first.
-        for (int i = traitIconContainer.childCount - 1; i >= 0; i--)
-        {
-            Destroy(traitIconContainer.GetChild(i).gameObject);
-        }
-
-        // Spawn one icon for each preferred room trait.
-        for (int i = 0; i < preferredTraits.Count; i++)
-        {
-            RoomTrait trait = preferredTraits[i];
-            GameObject iconObj = Instantiate(traitIconPrefab, traitIconContainer);
-
-            Sprite iconSprite = traitIconDatabase.GetIcon(trait);
-
-            TraitIconUI iconUI = iconObj.GetComponent<TraitIconUI>();
-            if (iconUI != null)
-            {
-                iconUI.SetSprite(iconSprite);
-            }
-            else
-            {
-                Image image = iconObj.GetComponent<Image>();
-                if (image != null)
-                {
-                    image.sprite = iconSprite;
-                    image.enabled = iconSprite != null;
-                }
-            }
-        }
-    }
-
-    private void RefreshAdjacencyIcons()
-    {
-        if (adjacencyIconContainer == null || adjacencyIconPrefab == null || adjacencyIconDatabase == null)
-            return;
-
-        for (int i = adjacencyIconContainer.childCount - 1; i >= 0; i--)
-            Destroy(adjacencyIconContainer.GetChild(i).gameObject);
-
-        for (int i = 0; i < adjacencyPreferences.Count; i++)
-        {
-            GuestAdjacencyPreference preference = adjacencyPreferences[i];
-
-            GameObject iconObj = Instantiate(adjacencyIconPrefab, adjacencyIconContainer);
-            Sprite iconSprite = adjacencyIconDatabase.GetIcon(preference.type);
-
-            TraitIconUI iconUI = iconObj.GetComponent<TraitIconUI>();
-            if (iconUI != null)
-                iconUI.SetSprite(iconSprite);
-        }
+        TraitIconUI iconUI = iconObj.GetComponent<TraitIconUI>();
+        if (iconUI != null)
+            iconUI.SetSprite(sprite);
     }
 
     // Instantly moves the card to its current target hand position.
@@ -638,7 +569,7 @@ public class GuestCard : MonoBehaviour,
         if (newPreferences != null)
             adjacencyPreferences.AddRange(newPreferences);
 
-        RefreshAdjacencyIcons();
+        RefreshMainGuestIcons();
     }
 
     private bool MatchesRequirements(RoomSlot room)
@@ -649,6 +580,11 @@ public class GuestCard : MonoBehaviour,
             {
                 case GuestRequirement.HatesDirtyRoom:
                     if (room.HasTrait(RoomTrait.Dirty))
+                        return false;
+                    break;
+
+                case GuestRequirement.HatesElevatorNoise:
+                    if (room.HasTrait(RoomTrait.NearElevator))
                         return false;
                     break;
             }
@@ -727,7 +663,7 @@ public class GuestCard : MonoBehaviour,
         if (newTraits != null)
             behaviorTraits.AddRange(newTraits);
 
-        RefreshBehaviorIcons();
+        RefreshMainGuestIcons();
     }
 
     public void SetRequirements(List<GuestRequirement> newRequirements)
@@ -737,7 +673,7 @@ public class GuestCard : MonoBehaviour,
         if (newRequirements != null)
             requirements.AddRange(newRequirements);
 
-        RefreshRequirementIcons();
+        RefreshMainGuestIcons();
     }
 
     public bool HasBehaviorTrait(GuestBehaviorTrait trait)

@@ -25,7 +25,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 112}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 20989
+  controlID: 4362
   draggingID: 0
 --- !u!114 &2
 MonoBehaviour:
@@ -154,7 +154,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 112}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 20958
+  controlID: 4363
   draggingID: 0
 --- !u!114 &4
 MonoBehaviour:
@@ -1085,7 +1085,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 112}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 21075
+  controlID: 4413
   draggingID: 0
 --- !u!114 &11
 MonoBehaviour:
@@ -1158,18 +1158,8 @@ MonoBehaviour:
       m_LastClickedID:
         m_Data: 0
       m_ExpandedIDs:
-      - m_Data: -50336
-      - m_Data: -1406
-      - m_Data: -1384
-      - m_Data: -1362
-      - m_Data: -1340
-      - m_Data: -1318
       - m_Data: -1316
-      - m_Data: 49528
-      - m_Data: 49644
-      - m_Data: 49936
-      - m_Data: 50076
-      - m_Data: 50340
+      - m_Data: 49652
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1214,8 +1204,8 @@ MonoBehaviour:
     y: 411
     width: 478
     height: 522
-  m_MinSize: {x: 232, y: 276}
-  m_MaxSize: {x: 10002, y: 10026}
+  m_MinSize: {x: 230, y: 250}
+  m_MaxSize: {x: 10000, y: 10000}
   m_ActualView: {fileID: 14}
   m_Panes:
   - {fileID: 14}
@@ -1270,8 +1260,7 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SkipHidden: 0
     m_SearchArea: 1
-    m_Folders:
-    - Assets/Prefabs
+    m_Folders: []
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -1293,18 +1282,19 @@ MonoBehaviour:
       m_Data: 0
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 49080
-    - m_Data: 50924
-    - m_Data: 50926
-    - m_Data: 50928
-    - m_Data: 50930
-    - m_Data: 50932
-    - m_Data: 50934
-    - m_Data: 50936
-    - m_Data: 50938
-    - m_Data: 50940
-    - m_Data: 50942
-    - m_Data: 67764
+    - m_Data: 49084
+    - m_Data: 50946
+    - m_Data: 50948
+    - m_Data: 50950
+    - m_Data: 50952
+    - m_Data: 50954
+    - m_Data: 50956
+    - m_Data: 50958
+    - m_Data: 50960
+    - m_Data: 50962
+    - m_Data: 50964
+    - m_Data: 50966
+    - m_Data: 51130
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1331,28 +1321,30 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_AssetTreeState:
-    scrollPos: {x: 0, y: 814}
-    m_SelectedIDs: []
+    scrollPos: {x: 0, y: 14}
+    m_SelectedIDs:
+    - m_Data: 56118
     m_LastClickedID:
-      m_Data: 0
+      m_Data: 56118
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 49080
-    - m_Data: 50924
-    - m_Data: 50926
-    - m_Data: 50928
-    - m_Data: 50930
-    - m_Data: 50932
-    - m_Data: 50934
-    - m_Data: 50936
-    - m_Data: 50938
-    - m_Data: 50940
-    - m_Data: 50942
-    - m_Data: 67764
+    - m_Data: 49084
+    - m_Data: 50946
+    - m_Data: 50948
+    - m_Data: 50950
+    - m_Data: 50952
+    - m_Data: 50954
+    - m_Data: 50956
+    - m_Data: 50958
+    - m_Data: 50960
+    - m_Data: 50962
+    - m_Data: 50964
+    - m_Data: 50966
+    - m_Data: 51130
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: 
-      m_OriginalName: 
+      m_Name: GuestAdjacencyPreferenceUtility
+      m_OriginalName: GuestAdjacencyPreferenceUtility
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
@@ -1360,10 +1352,10 @@ MonoBehaviour:
         width: 0
         height: 0
       m_UserData:
-        m_Data: 0
+        m_Data: 56118
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 11
+      m_OriginalEventType: 0
       m_IsRenamingFilename: 1
       m_TrimLeadingAndTrailingWhitespace: 0
       m_ClientGUIView: {fileID: 13}
@@ -1375,8 +1367,9 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: []
-    m_LastClickedInstanceID: 0
+    m_SelectedInstanceIDs:
+    - m_Data: 56118
+    m_LastClickedInstanceID: 56118
     m_HadKeyboardFocusLastEvent: 0
     m_ExpandedInstanceIDs: []
     m_RenameOverlay:
@@ -1617,8 +1610,8 @@ MonoBehaviour:
     y: 0
     width: 392
     height: 933
-  m_MinSize: {x: 276, y: 76}
-  m_MaxSize: {x: 4001, y: 4026}
+  m_MinSize: {x: 275, y: 50}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 17}
   m_Panes:
   - {fileID: 17}
@@ -1668,7 +1661,7 @@ MonoBehaviour:
     m_CachedPref: 197
     m_ControlHash: 1412526313
     m_PrefName: Preview_InspectorPreview
-  m_LastInspectedObjectInstanceID: -1
+  m_LastInspectedObjectInstanceID: 56118
   m_LastVerticalScrollValue: 0
   m_GlobalObjectId: 
   m_InspectorMode: 0

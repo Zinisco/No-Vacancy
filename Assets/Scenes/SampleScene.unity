@@ -156,7 +156,7 @@ MonoBehaviour:
   handManager: {fileID: 977239539}
   cardAnimationController: {fileID: 774645622}
   gameUIController: {fileID: 126090253}
-  levelConfig: {fileID: 11400000, guid: fc1d9e63456877e488ee1b48e3bffa69, type: 2}
+  levelConfig: {fileID: 11400000, guid: b01fa36389e715944b815806e3d54925, type: 2}
   drawAmountPerRefill: 1
   drawStaggerDelay: 0.03
 --- !u!4 &8187146
@@ -4386,7 +4386,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 101, y: 60}
+  m_AnchoredPosition: {x: 79, y: 88}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &674545689
@@ -4407,7 +4407,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 0
-  m_Spacing: -28
+  m_Spacing: -38
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
@@ -5886,6 +5886,9 @@ MonoBehaviour:
   rowPrefab: {fileID: 5985173857808795112, guid: e9a6a35d49767214da4d4d8a42b812d9, type: 3}
   traitIconDatabase: {fileID: 11400000, guid: 204cb177f883cdc418c8b085774a1720, type: 2}
   floorPreferenceIconDatabase: {fileID: 11400000, guid: 044daf952c6196f45a8686e98cf5c77f, type: 2}
+  behaviorIconDatabase: {fileID: 11400000, guid: 0260fc44f3ecd9e4885c9dc24d04e25f, type: 2}
+  requirementIconDatabase: {fileID: 11400000, guid: d053c3aa8bdd35d4d86a5e6d86922ad2, type: 2}
+  adjacencyIconDatabase: {fileID: 11400000, guid: e3a58645229984b4c8c7e4f1c94f8eda, type: 2}
 --- !u!114 &914929295
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7767,7 +7770,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -6.89995, y: 128.9}
+  m_AnchoredPosition: {x: -24, y: 136}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1171645451
@@ -7817,8 +7820,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
-  m_fontSizeBase: 20
+  m_fontSize: 18
+  m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -7856,7 +7859,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: 16.671425, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -9448,8 +9451,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 139, y: 211}
-  m_SizeDelta: {x: 250, y: 400}
+  m_AnchoredPosition: {x: 162, y: 211}
+  m_SizeDelta: {x: 300, y: 400}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1363497739
 MonoBehaviour:
@@ -13145,7 +13148,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -11.2, y: 174}
+  m_AnchoredPosition: {x: -27, y: 175}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1856981471
@@ -13195,8 +13198,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 28
-  m_fontSizeBase: 28
+  m_fontSize: 26
+  m_fontSizeBase: 26
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
