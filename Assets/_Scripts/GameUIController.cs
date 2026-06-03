@@ -56,6 +56,18 @@ public class GameUIController : MonoBehaviour
         StartCoroutine(AnimateStarsRoutine(starsEarned));
     }
 
+    public void HideLevelCompletePanel()
+    {
+        if (levelCompletePanel != null)
+            levelCompletePanel.SetActive(false);
+
+        for (int i = 0; i < stars.Count; i++)
+        {
+            if (stars[i] != null)
+                stars[i].SetFilled(false);
+        }
+    }
+
     private IEnumerator AnimateStarsRoutine(int starsEarned)
     {
         starsEarned = Mathf.Clamp(starsEarned, 0, stars.Count);

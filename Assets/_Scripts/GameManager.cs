@@ -883,8 +883,8 @@ public class GameManager : MonoBehaviour
 
         Log($"Level complete! Hotel Rating: {stars} Stars ({satisfiedGuests}/{totalGuests} guests satisfied)");
 
+        LevelProgressManager.Instance?.CompleteCurrentLevel(stars);
         gameUIController?.ShowLevelCompletePanel(stars, satisfiedGuests, totalGuests);
-        // Unlock next level here.
     }
 
     private int CalculateStarRating(int satisfiedGuests, int totalGuests)
@@ -993,20 +993,25 @@ public class GameManager : MonoBehaviour
 
     public void OnRetryButtonPressed()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        LevelProgressManager.Instance?.RetryCurrentLevel();
     }
 
     public void OnContinueButtonPressed()
     {
-        int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
+        LevelProgressManager.Instance?.ContinueToNextLevel();
+    }
 
-        if (nextSceneIndex >= SceneManager.sceneCountInBuildSettings)
-        {
-            Log("No next level yet.");
-            return;
-        }
+    public void LoadLevel(LevelConfig config)
+    {
+        levelConfig = config;
 
-        SceneManager.LoadScene(nextSceneIndex);
+        levelSubmitted = false;
+        isBusy = false;
+
+        gameUIController?.HideLevelCompletePanel();
+
+        InitializeRooms();
+        StartGame();
     }
 
     #endregion

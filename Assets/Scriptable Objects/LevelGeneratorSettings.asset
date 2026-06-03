@@ -19,16 +19,16 @@ MonoBehaviour:
     allowAdjacencyRules: 0
     allowBehaviorTraits: 0
     allowRequirements: 1
-    allowedTraits: 0000000001000000
+    allowedTraits: 000000000100000009000000
     allowedBehaviors: 
-    allowedRequirements: 01000000
+    allowedRequirements: 00000000
   targetComplexity: 0
   floorCount: 1
-  roomsPerFloor: 4
+  roomsPerFloor: 6
   topFloorFirst: 0
-  elevatorColumnIndex: 2
+  elevatorColumnIndex: 3
   minTraitsPerRoom: 1
-  maxTraitsPerRoom: 1
+  maxTraitsPerRoom: 2
   minPreferencesPerGuest: 1
   maxPreferencesPerGuest: 2
   possibleGuestNames:

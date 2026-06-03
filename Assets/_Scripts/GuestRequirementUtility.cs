@@ -5,7 +5,7 @@ public static class GuestRequirementUtility
         switch (requirement)
         {
             case GuestRequirement.HatesDirtyRoom:
-                return "Hates Dirty Rooms";
+                return "Wants Clean Room";
 
             case GuestRequirement.HatesElevatorNoise:
                 return "Hates Elevator Noise";
