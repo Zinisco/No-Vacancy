@@ -23,6 +23,9 @@ public class GameManager : MonoBehaviour
     [Header("Prefabs")]
     [SerializeField] private GuestCard guestCardPrefab;
 
+    [Header("Story")]
+    [SerializeField] private DialogueSequence introDialogue;
+
     [Header("Board")]
     [SerializeField] private RoomSlot roomSlotPrefab;
     [SerializeField] private RoomSlot elevatorSlotPrefab;
@@ -55,10 +58,40 @@ public class GameManager : MonoBehaviour
     //Check that all necessary references are assigned, then initialize the rooms and start the game.
     private void Start()
     {
+        if (LevelProgressManager.Instance != null)
+        {
+            levelConfig = LevelProgressManager.Instance.CurrentLevelConfig;
+        }
+
         if (!ValidateReferences())
             return;
 
         InitializeRooms();
+
+        bool shouldPlayIntro =
+            LevelProgressManager.Instance != null &&
+            LevelProgressManager.Instance.ShouldPlayIntroDialogue &&
+            introDialogue != null &&
+            DialogueManager.Instance != null;
+
+        if (shouldPlayIntro)
+        {
+            DialogueManager.Instance.Play(introDialogue);
+            StartCoroutine(StartGameAfterDialogue());
+        }
+        else
+        {
+            StartGame();
+        }
+    }
+
+    private IEnumerator StartGameAfterDialogue()
+    {
+        while (DialogueManager.Instance != null && DialogueManager.Instance.IsPlaying)
+            yield return null;
+
+        LevelProgressManager.Instance?.MarkIntroDialoguePlayed();
+
         StartGame();
     }
 
@@ -250,7 +283,14 @@ public class GameManager : MonoBehaviour
         if (!room.CanAcceptGuest)
         {
             SelectRoomSlot(room);
-            Log("You can't place a guest in the elevator.");
+            if (room.IsElevator && room.IsBrokenElevator)
+                Log("The elevator is broken.");
+            else if (room.IsClosed)
+                Log("This room is closed off.");
+            else if (room.IsElevator)
+                Log("You can't place a guest in the elevator.");
+            else
+                Log("You can't place a guest here.");
             return;
         }
 

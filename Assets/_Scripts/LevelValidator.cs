@@ -204,8 +204,11 @@ public static class LevelValidator
 
         for (int i = 0; i < slots.Count; i++)
         {
-            if (slots[i].slotType == SlotType.Room)
+            if (slots[i].slotType == SlotType.Room &&
+                slots[i].availability == RoomAvailability.Open)
+            {
                 rooms.Add(slots[i]);
+            }
         }
 
         return rooms;
@@ -229,7 +232,7 @@ public static class LevelValidator
         {
             switch (guest.requirements[i])
             {
-                case GuestRequirement.HatesDirtyRoom:
+                case GuestRequirement.WantsCleanRoom:
                     if (room.traits.Contains(RoomTrait.Dirty))
                         return false;
                     break;

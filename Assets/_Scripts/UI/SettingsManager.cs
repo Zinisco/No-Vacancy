@@ -15,10 +15,6 @@ public class SettingsManager : MonoBehaviour
     [Header("Buttons")]
     [SerializeField] private Button backButton;
 
-    [Header("General")]
-    [SerializeField] private Slider mouseSlider;
-    [SerializeField] private TMP_InputField mouseInput;
-
     [Header("Audio Mixer")]
     [SerializeField] private AudioMixer audioMixer;
 
@@ -37,8 +33,6 @@ public class SettingsManager : MonoBehaviour
     [Header("Graphics")]
     [SerializeField] private TMP_Dropdown windowModeDropdown;
     [SerializeField] private TMP_Dropdown resolutionDropdown;
-
-    private const string KEY_MOUSE = "MouseSensitivity";
 
     private const string KEY_MASTER = "MasterVolume";
     private const string KEY_MUSIC = "MusicVolume";
@@ -62,7 +56,6 @@ public class SettingsManager : MonoBehaviour
         if (backButton != null)
             backButton.onClick.AddListener(CloseSettings);
 
-        InitializeGeneral();
         InitializeAudio();
         InitializeGraphics();
 
@@ -93,59 +86,6 @@ public class SettingsManager : MonoBehaviour
 
         if (pauseMenuPanel != null)
             pauseMenuPanel.SetActive(true);
-    }
-
-    #endregion
-
-    #region General Settings
-
-    private void InitializeGeneral()
-    {
-        if (mouseSlider == null || mouseInput == null)
-            return;
-
-        mouseSlider.minValue = 0.1f;
-        mouseSlider.maxValue = 5f;
-        mouseSlider.wholeNumbers = false;
-
-        float savedMouse = PlayerPrefs.GetFloat(KEY_MOUSE, DEFAULT_MOUSE);
-
-        mouseSlider.SetValueWithoutNotify(savedMouse);
-        mouseInput.SetTextWithoutNotify(savedMouse.ToString("0.00"));
-
-        mouseSlider.onValueChanged.AddListener(OnMouseSliderChanged);
-        mouseInput.onEndEdit.AddListener(OnMouseInputChanged);
-    }
-
-    private void OnMouseSliderChanged(float value)
-    {
-        if (initializing)
-            return;
-
-        value = Mathf.Clamp(value, 0.1f, 5f);
-
-        if (mouseInput != null)
-            mouseInput.SetTextWithoutNotify(value.ToString("0.00"));
-
-        PlayerPrefs.SetFloat(KEY_MOUSE, value);
-        PlayerPrefs.Save();
-    }
-
-    private void OnMouseInputChanged(string text)
-    {
-        if (!float.TryParse(text, out float value))
-            value = DEFAULT_MOUSE;
-
-        value = Mathf.Clamp(value, 0.1f, 5f);
-
-        if (mouseSlider != null)
-            mouseSlider.SetValueWithoutNotify(value);
-
-        if (mouseInput != null)
-            mouseInput.SetTextWithoutNotify(value.ToString("0.00"));
-
-        PlayerPrefs.SetFloat(KEY_MOUSE, value);
-        PlayerPrefs.Save();
     }
 
     #endregion

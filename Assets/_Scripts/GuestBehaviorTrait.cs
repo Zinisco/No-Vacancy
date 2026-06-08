@@ -7,6 +7,6 @@ public enum GuestBehaviorTrait
 
 public enum GuestRequirement
 {
-    HatesDirtyRoom,
+    WantsCleanRoom,
     HatesElevatorNoise
 }

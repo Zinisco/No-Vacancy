@@ -10,55 +10,79 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 993aaf6be17430048bcf3c4c153a53a7, type: 3}
-  m_Name: Level_01
+  m_Name: ChapterOne_Level03
   m_EditorClassIdentifier: Assembly-CSharp::LevelConfig
   rooms:
-  - roomNumber: 102
-    slotType: 0
-    floorIndex: 1
-    columnIndex: 0
-    traits: 00000000
-  - roomNumber: 101
-    slotType: 0
-    floorIndex: 1
-    columnIndex: 1
-    traits: 0100000005000000
-  - roomNumber: E1
-    slotType: 1
-    floorIndex: 1
-    columnIndex: 2
-    traits: 
   - roomNumber: 103
     slotType: 0
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 1
+    columnIndex: 0
+    traits: 090000000a000000
+  - roomNumber: 102
+    slotType: 0
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 1
+    columnIndex: 1
+    traits: 0900000001000000
+  - roomNumber: 101
+    slotType: 0
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 1
+    columnIndex: 2
+    traits: 000000000900000005000000
+  - roomNumber: E1
+    slotType: 1
+    availability: 0
+    elevatorStatus: 1
     floorIndex: 1
     columnIndex: 3
-    traits: 0000000005000000
+    traits: 
   - roomNumber: 104
     slotType: 0
+    availability: 0
+    elevatorStatus: 0
     floorIndex: 1
     columnIndex: 4
-    traits: 01000000
+    traits: 040000000000000005000000
+  - roomNumber: 105
+    slotType: 0
+    availability: 1
+    elevatorStatus: 0
+    floorIndex: 1
+    columnIndex: 5
+    traits: 090000000a000000
+  - roomNumber: 106
+    slotType: 0
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 1
+    columnIndex: 6
+    traits: 040000000a000000
   guests:
-  - guestName: Charlie
-    preferredTraits: 00000000
-    preferredFloorPreferences: 
-    adjacencyPreferences: []
-    behaviorTraits: 
-    requirements: 
-  - guestName: Rowan
-    preferredTraits: 0500000001000000
-    preferredFloorPreferences: 
-    adjacencyPreferences: []
-    behaviorTraits: 
-    requirements: 
   - guestName: Logan
-    preferredTraits: 00000000
+    preferredTraits: 0000000005000000
     preferredFloorPreferences: 
     adjacencyPreferences: []
     behaviorTraits: 
-    requirements: 01000000
+    requirements: 
+  - guestName: Hayden
+    preferredTraits: 0a000000
+    preferredFloorPreferences: 
+    adjacencyPreferences: []
+    behaviorTraits: 
+    requirements: 
   - guestName: Riley
-    preferredTraits: 01000000
+    preferredTraits: 0000000004000000
+    preferredFloorPreferences: 
+    adjacencyPreferences: []
+    behaviorTraits: 
+    requirements: 00000000
+  - guestName: Morgan
+    preferredTraits: 040000000a000000
     preferredFloorPreferences: 
     adjacencyPreferences: []
     behaviorTraits: 

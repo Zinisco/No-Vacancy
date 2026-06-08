@@ -4,6 +4,8 @@ public class GeneratedRoomData
 {
     public string roomNumber;
     public SlotType slotType = SlotType.Room;
+    public RoomAvailability availability = RoomAvailability.Open;
+    public ElevatorStatus elevatorStatus = ElevatorStatus.Working;
 
     public int floorIndex;
     public int columnIndex;

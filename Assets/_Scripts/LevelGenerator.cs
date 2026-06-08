@@ -29,6 +29,7 @@ public static class LevelGenerator
         }
 
         ApplyNearElevatorTraits(slots);
+        ApplyClosedRooms(settings, slots);
 
         return slots;
     }
@@ -52,22 +53,24 @@ public static class LevelGenerator
                     slotType = SlotType.Elevator,
                     floorIndex = floorNumber,
                     columnIndex = column,
-                    traits = new List<RoomTrait>()
+                    traits = new List<RoomTrait>(),
+                    elevatorStatus = settings.elevatorStatus
                 };
 
                 floorSlots.Add(elevator);
             }
             else
             {
+
                 GeneratedRoomData room = new GeneratedRoomData
                 {
                     roomNumber = "",
                     slotType = SlotType.Room,
                     floorIndex = floorNumber,
                     columnIndex = column,
+                    availability = RoomAvailability.Open,
                     traits = GenerateRoomTraits(settings)
                 };
-
                 floorSlots.Add(room);
             }
         }
@@ -217,17 +220,21 @@ public static class LevelGenerator
 
         for (int i = 0; i < slots.Count; i++)
         {
-            if (slots[i].slotType == SlotType.Room)
+            if (slots[i].slotType == SlotType.Room && slots[i].availability == RoomAvailability.Open)
                 actualRooms.Add(slots[i]);
         }
 
         if (actualRooms.Count == 0)
             return guests;
 
+        Shuffle(actualRooms);
+
+        int guestsToGenerate = Mathf.Clamp(settings.guestCount, 1, actualRooms.Count);
+
         List<string> shuffledNames = new(settings.possibleGuestNames);
         Shuffle(shuffledNames);
 
-        for (int i = 0; i < actualRooms.Count; i++)
+        for (int i = 0; i < guestsToGenerate; i++)
         {
             GeneratedRoomData sourceRoom = actualRooms[i];
 
@@ -254,7 +261,18 @@ public static class LevelGenerator
 
     private static List<RoomTrait> GenerateGuestPreferencesFromRoom(LevelGeneratorSettings settings, GeneratedRoomData room)
     {
-        List<RoomTrait> shuffled = new(room.traits);
+        List<RoomTrait> shuffled = new();
+
+        for (int i = 0; i < room.traits.Count; i++)
+        {
+            RoomTrait trait = room.traits[i];
+
+            if (!CanBeGuestPreference(trait))
+                continue;
+
+            shuffled.Add(trait);
+        }
+
         Shuffle(shuffled);
 
         int prefCount = Random.Range(settings.minPreferencesPerGuest, settings.maxPreferencesPerGuest + 1);
@@ -277,9 +295,6 @@ public static class LevelGenerator
             if (prefs.Count >= prefCount)
                 break;
         }
-
-        if (prefs.Count == 0 && shuffled.Count > 0)
-            prefs.Add(shuffled[0]);
 
         return prefs;
     }
@@ -369,6 +384,65 @@ public static class LevelGenerator
                     targetGuestName = target.guestName
                 });
             }
+        }
+    }
+
+    private static void ApplyClosedRooms(LevelGeneratorSettings settings, List<GeneratedRoomData> slots)
+    {
+        if (settings == null || slots == null)
+            return;
+
+        for (int i = 0; i < slots.Count; i++)
+        {
+            if (slots[i].slotType == SlotType.Room)
+                slots[i].availability = RoomAvailability.Open;
+        }
+
+        if (settings.closedRoomRules == null)
+            return;
+
+        for (int r = 0; r < settings.closedRoomRules.Count; r++)
+        {
+            ClosedRoomRule rule = settings.closedRoomRules[r];
+
+            if (rule == null || rule.closedRoomCount <= 0)
+                continue;
+
+            List<GeneratedRoomData> roomsOnFloor = new();
+
+            for (int i = 0; i < slots.Count; i++)
+            {
+                GeneratedRoomData slot = slots[i];
+
+                if (slot.slotType != SlotType.Room)
+                    continue;
+
+                if (slot.floorIndex != rule.floorIndex)
+                    continue;
+
+                roomsOnFloor.Add(slot);
+            }
+
+            Shuffle(roomsOnFloor);
+
+            int closedCount = Mathf.Clamp(rule.closedRoomCount, 0, roomsOnFloor.Count);
+
+            for (int i = 0; i < closedCount; i++)
+            {
+                roomsOnFloor[i].availability = RoomAvailability.Closed;
+            }
+        }
+    }
+
+    private static bool CanBeGuestPreference(RoomTrait trait)
+    {
+        switch (trait)
+        {
+            case RoomTrait.Dirty:
+                return false;
+
+            default:
+                return true;
         }
     }
 

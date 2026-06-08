@@ -578,7 +578,7 @@ public class GuestCard : MonoBehaviour,
         {
             switch (requirements[i])
             {
-                case GuestRequirement.HatesDirtyRoom:
+                case GuestRequirement.WantsCleanRoom:
                     if (room.HasTrait(RoomTrait.Dirty))
                         return false;
                     break;

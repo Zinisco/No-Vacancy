@@ -15,22 +15,29 @@ MonoBehaviour:
   outputFolder: Assets/Levels
   levelNamePrefix: GeneratedLevel
   ruleset:
-    allowFloorPreferences: 0
+    allowFloorPreferences: 1
     allowAdjacencyRules: 0
     allowBehaviorTraits: 0
     allowRequirements: 1
-    allowedTraits: 000000000100000009000000
+    allowedTraits: 000000000100000004000000090000000a000000
     allowedBehaviors: 
-    allowedRequirements: 00000000
-  targetComplexity: 0
-  floorCount: 1
+    allowedRequirements: 0000000001000000
+  targetComplexity: 1
+  guestCount: 8
+  closedRoomRules:
+  - floorIndex: 1
+    closedRoomCount: 2
+  - floorIndex: 2
+    closedRoomCount: 4
+  elevatorStatus: 0
+  floorCount: 2
   roomsPerFloor: 6
   topFloorFirst: 0
   elevatorColumnIndex: 3
-  minTraitsPerRoom: 1
-  maxTraitsPerRoom: 2
-  minPreferencesPerGuest: 1
-  maxPreferencesPerGuest: 2
+  minTraitsPerRoom: 2
+  maxTraitsPerRoom: 3
+  minPreferencesPerGuest: 2
+  maxPreferencesPerGuest: 3
   possibleGuestNames:
   - Alex
   - Jordan

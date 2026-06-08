@@ -10,77 +10,73 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 993aaf6be17430048bcf3c4c153a53a7, type: 3}
-  m_Name: Level_02
+  m_Name: ChapterOne_Level02
   m_EditorClassIdentifier: Assembly-CSharp::LevelConfig
   rooms:
   - roomNumber: 103
     slotType: 0
+    availability: 0
+    elevatorStatus: 0
     floorIndex: 1
     columnIndex: 0
-    traits: 0900000001000000
+    traits: 0100000009000000
   - roomNumber: 102
     slotType: 0
+    availability: 1
+    elevatorStatus: 0
     floorIndex: 1
     columnIndex: 1
-    traits: 00000000
+    traits: 0000000009000000
   - roomNumber: 101
     slotType: 0
+    availability: 0
+    elevatorStatus: 0
     floorIndex: 1
     columnIndex: 2
-    traits: 010000000900000005000000
+    traits: 040000000100000005000000
   - roomNumber: E1
     slotType: 1
+    availability: 0
+    elevatorStatus: 1
     floorIndex: 1
     columnIndex: 3
     traits: 
   - roomNumber: 104
     slotType: 0
+    availability: 0
+    elevatorStatus: 0
     floorIndex: 1
     columnIndex: 4
-    traits: 0900000005000000
+    traits: 000000000900000005000000
   - roomNumber: 105
     slotType: 0
+    availability: 0
+    elevatorStatus: 0
     floorIndex: 1
     columnIndex: 5
-    traits: 09000000
+    traits: 0100000004000000
   - roomNumber: 106
     slotType: 0
+    availability: 1
+    elevatorStatus: 0
     floorIndex: 1
     columnIndex: 6
-    traits: 0900000000000000
+    traits: 0100000004000000
   guests:
-  - guestName: Blake
-    preferredTraits: 0900000001000000
+  - guestName: Skyler
+    preferredTraits: 01000000
     preferredFloorPreferences: 
     adjacencyPreferences: []
     behaviorTraits: 
     requirements: 
-  - guestName: Avery
-    preferredTraits: 00000000
-    preferredFloorPreferences: 
-    adjacencyPreferences: []
-    behaviorTraits: 
-    requirements: 
-  - guestName: Quinn
+  - guestName: Jamie
     preferredTraits: 0500000001000000
     preferredFloorPreferences: 
     adjacencyPreferences: []
     behaviorTraits: 
-    requirements: 
-  - guestName: Sam
-    preferredTraits: 05000000
-    preferredFloorPreferences: 
-    adjacencyPreferences: []
-    behaviorTraits: 
-    requirements: 
-  - guestName: Chris
-    preferredTraits: 09000000
-    preferredFloorPreferences: 
-    adjacencyPreferences: []
-    behaviorTraits: 
-    requirements: 
-  - guestName: Casey
-    preferredTraits: 0900000000000000
+    requirements: 00000000
+  - guestName: Dakota
+    preferredTraits: 0400000001000000
     preferredFloorPreferences: 
     adjacencyPreferences: []
     behaviorTraits: 

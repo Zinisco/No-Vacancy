@@ -40,7 +40,11 @@ public static class LevelConfigGenerator
                     slotType = room.slotType,
                     floorIndex = room.floorIndex,
                     columnIndex = room.columnIndex,
-                    traits = new List<RoomTrait>(room.traits)
+                    traits = new List<RoomTrait>(room.traits),
+                    availability = room.availability,
+                    elevatorStatus = room.slotType == SlotType.Elevator
+    ? room.elevatorStatus
+    : ElevatorStatus.Working
                 };
                 newLevel.rooms.Add(roomEntry);
             }

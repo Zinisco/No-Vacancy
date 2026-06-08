@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d22778bf57e3fca41942264a944f8db6, type: 3}
+  m_Name: Chapter One Dialogue
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
+  lines:
+  - text: Hey. Still not answering my calls, huh?
+    voiceClip: {fileID: 0}
+  - text: 'Don''t blame you. I wouldn''t either. '
+    voiceClip: {fileID: 0}
+  - text: Listen. I have my regrets. We both do. Your Mother and I. We were lost
+      for a long time. Kept telling ourselves we were doing our best. Guess that's
+      where we were wrong.
+    voiceClip: {fileID: 0}
+  - text: "We should\u2019ve been there for you, especially for the times when you
+      needed us most. We know that now. "
+    voiceClip: {fileID: 0}
+  - text: "Your mother talks about you all the time. She keeps asking if you\u2019re
+      ever coming home. I\u2019ll tell her I don\u2019t know"
+    voiceClip: {fileID: 0}
+  - text: 'Anyway, if you do decide to come back. The hotel is yours now. Keys are
+      in the security box by the front doors. Code is 4673. '
+    voiceClip: {fileID: 0}
+  - text: Upper floors are blocked off.  Elevator was shut down back in February.
+      We couldn't afford the repairs once the medical bills started to hit.  Can't
+      afford much of anything right now.
+    voiceClip: {fileID: 0}
+  - text: Lights still work. Most of the time. And some rooms might need a bit of
+      sprucing up. But I'm sure that's not too much for you to handle
+    voiceClip: {fileID: 0}
+  - text: "\u2026would be nice seeing this place alive again."
+    voiceClip: {fileID: 0}
+  - text: 'Hope to hear from you. Love you. '
+    voiceClip: {fileID: 0}

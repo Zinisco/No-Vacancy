@@ -38,6 +38,20 @@ public class RoomSlot : MonoBehaviour,
     // Other scripts can look at the traits, but they cannot directly change the list.
     public IReadOnlyList<RoomTrait> Traits => traits;
 
+    [SerializeField] private RoomAvailability availability = RoomAvailability.Open;
+    [SerializeField] private ElevatorStatus elevatorStatus = ElevatorStatus.Working;
+
+    [SerializeField] private GameObject closedOverlay;
+    [SerializeField] private TMP_Text statusText;
+
+    public RoomAvailability Availability => availability;
+    public ElevatorStatus ElevatorStatus => elevatorStatus;
+
+    public bool IsClosed => availability == RoomAvailability.Closed;
+    public bool IsBrokenElevator =>
+        slotType == SlotType.Elevator &&
+        elevatorStatus == ElevatorStatus.Broken;
+
     [Header("Refs")]
 
     // Text component that shows the room number on screen.
@@ -84,7 +98,7 @@ public class RoomSlot : MonoBehaviour,
 
     // Returns true if this slot can accept guests.
     // Elevators cannot accept guests.
-    public bool CanAcceptGuest => slotType == SlotType.Room;
+    public bool CanAcceptGuest => slotType == SlotType.Room && availability == RoomAvailability.Open;
 
     public int FloorIndex => floorIndex;
     public int ColumnIndex => columnIndex;
@@ -137,6 +151,9 @@ public class RoomSlot : MonoBehaviour,
         slotType = data.slotType;
         floorIndex = data.floorIndex;
         columnIndex = data.columnIndex;
+        availability = data.availability;
+        elevatorStatus = data.elevatorStatus;
+        RefreshAvailabilityVisuals();
 
         // Copy traits from the level data into this room.
         traits.Clear();
@@ -342,6 +359,30 @@ public class RoomSlot : MonoBehaviour,
                     image.sprite = iconSprite;
                     image.enabled = iconSprite != null;
                 }
+            }
+        }
+    }
+
+    private void RefreshAvailabilityVisuals()
+    {
+        bool unavailable =
+     availability != RoomAvailability.Open ||
+     IsBrokenElevator;
+
+        if (closedOverlay != null)
+            closedOverlay.SetActive(unavailable);
+
+        if (statusText != null)
+        {
+            statusText.gameObject.SetActive(unavailable);
+
+            if (availability == RoomAvailability.Closed)
+            {
+                statusText.text = "CLOSED";
+            }
+            else if (IsBrokenElevator)
+            {
+                statusText.text = "BROKEN";
             }
         }
     }

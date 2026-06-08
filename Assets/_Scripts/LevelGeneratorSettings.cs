@@ -14,6 +14,15 @@ public class LevelGeneratorSettings : ScriptableObject
     [Header("Difficulty")]
     public PuzzleComplexity targetComplexity = PuzzleComplexity.Intro;
 
+    [Header("Guests")]
+    public int guestCount = 3;
+
+    [Header("Room Availability")]
+    public List<ClosedRoomRule> closedRoomRules = new();
+
+    [Header("Elevator")]
+    public ElevatorStatus elevatorStatus = ElevatorStatus.Working;
+
     [Header("Layout")]
     public int floorCount = 3;
     public int roomsPerFloor = 3;

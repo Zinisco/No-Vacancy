@@ -15,6 +15,9 @@ public class LevelRoomEntry
     public string roomNumber;
     public SlotType slotType = SlotType.Room;
 
+    public RoomAvailability availability = RoomAvailability.Open;
+    public ElevatorStatus elevatorStatus = ElevatorStatus.Working;
+
     public int floorIndex;
     public int columnIndex;
 
@@ -30,4 +33,11 @@ public class LevelGuestEntry
     public List<GuestAdjacencyPreference> adjacencyPreferences = new List<GuestAdjacencyPreference>();
     public List<GuestBehaviorTrait> behaviorTraits = new List<GuestBehaviorTrait>();
     public List<GuestRequirement> requirements = new();
+}
+
+[Serializable]
+public class ClosedRoomRule
+{
+    public int floorIndex = 1;
+    public int closedRoomCount = 0;
 }
