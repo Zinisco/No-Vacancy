@@ -23,6 +23,17 @@ public class GameManager : MonoBehaviour
     [Header("Prefabs")]
     [SerializeField] private GuestCard guestCardPrefab;
 
+    [Header("Intro Timing")]
+    [SerializeField] private float introSilentDelay = 2f;
+
+    [Header("Intro Audio")]
+    [SerializeField] private AudioSource introAudioSource;
+    [SerializeField] private AudioClip phoneRingingClip;
+
+    [Header("Call Music")]
+    [SerializeField] private AudioSource callMusicSource;
+    [SerializeField] private AudioClip callMusicClip;
+
     [Header("Story")]
     [SerializeField] private DialogueSequence introDialogue;
 
@@ -54,8 +65,6 @@ public class GameManager : MonoBehaviour
 
     #region Unity Lifecycle
 
-
-    //Check that all necessary references are assigned, then initialize the rooms and start the game.
     private void Start()
     {
         if (LevelProgressManager.Instance != null)
@@ -76,19 +85,52 @@ public class GameManager : MonoBehaviour
 
         if (shouldPlayIntro)
         {
-            DialogueManager.Instance.Play(introDialogue);
-            StartCoroutine(StartGameAfterDialogue());
+            StartCoroutine(PlayChapterIntroRoutine());
         }
         else
         {
+            DialogueManager.Instance?.HideSharedBackgroundInstant();
             StartGame();
         }
     }
 
-    private IEnumerator StartGameAfterDialogue()
+
+    //Check that all necessary references are assigned, then initialize the rooms and start the game.
+    private IEnumerator PlayChapterIntroRoutine()
     {
-        while (DialogueManager.Instance != null && DialogueManager.Instance.IsPlaying)
-            yield return null;
+        if (introAudioSource != null && phoneRingingClip != null)
+        {
+            introAudioSource.clip = phoneRingingClip;
+            introAudioSource.loop = false;
+        }
+
+        if (introSilentDelay > 0f)
+            yield return new WaitForSeconds(introSilentDelay);
+
+        if (IntroTextSequenceUI.Instance != null)
+        {
+            yield return StartCoroutine(
+                IntroTextSequenceUI.Instance.Play(introAudioSource)
+            );
+        }
+
+        if (callMusicSource != null && callMusicClip != null)
+        {
+            callMusicSource.clip = callMusicClip;
+            callMusicSource.loop = true;
+            callMusicSource.Play();
+        }
+
+        if (DialogueManager.Instance != null)
+        {
+            DialogueManager.Instance.Play(introDialogue);
+
+            while (DialogueManager.Instance.IsPlaying)
+                yield return null;
+        }
+
+        if (callMusicSource != null)
+            callMusicSource.Stop();
 
         LevelProgressManager.Instance?.MarkIntroDialoguePlayed();
 
@@ -1040,6 +1082,7 @@ public class GameManager : MonoBehaviour
     {
         LevelProgressManager.Instance?.ContinueToNextLevel();
     }
+
 
     public void LoadLevel(LevelConfig config)
     {

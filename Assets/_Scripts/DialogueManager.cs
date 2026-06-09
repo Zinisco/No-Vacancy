@@ -7,9 +7,12 @@ public class DialogueManager : MonoBehaviour
 {
     public static DialogueManager Instance { get; private set; }
 
-    [Header("UI")]
-    [SerializeField] private GameObject root;
-    [SerializeField] private CanvasGroup canvasGroup;
+    [Header("Shared Root")]
+    [SerializeField] private GameObject storyRoot;
+    [SerializeField] private CanvasGroup storyCanvasGroup;
+
+    [Header("Dialogue UI")]
+    [SerializeField] private GameObject dialogueRoot;
     [SerializeField] private TMP_Text bodyText;
 
     [Header("Audio")]
@@ -38,11 +41,14 @@ public class DialogueManager : MonoBehaviour
 
         Instance = this;
 
-        if (root != null)
-            root.SetActive(false);
+        if (storyRoot != null)
+            storyRoot.SetActive(true);
 
-        if (canvasGroup != null)
-            canvasGroup.alpha = 0f;
+        if (storyCanvasGroup != null)
+            storyCanvasGroup.alpha = 1f;
+
+        if (dialogueRoot != null)
+            dialogueRoot.SetActive(false);
     }
 
     private void Update()
@@ -57,6 +63,23 @@ public class DialogueManager : MonoBehaviour
 
         if (pressed)
             Advance();
+    }
+
+    public void ShowSharedBackgroundInstant()
+    {
+        if (storyRoot != null)
+            storyRoot.SetActive(true);
+
+        if (storyCanvasGroup != null)
+            storyCanvasGroup.alpha = 1f;
+    }
+
+    public IEnumerator FadeSharedBackgroundIn()
+    {
+        if (storyRoot != null)
+            storyRoot.SetActive(true);
+
+        yield return FadeStoryRoot(1f);
     }
 
     public void Play(DialogueSequence sequence)
@@ -77,12 +100,14 @@ public class DialogueManager : MonoBehaviour
         IsPlaying = true;
         canAdvance = false;
 
-        if (root != null)
-            root.SetActive(true);
+        ShowSharedBackgroundInstant();
 
-        yield return Fade(1f);
+        if (dialogueRoot != null)
+            dialogueRoot.SetActive(true);
 
         ShowCurrentLine();
+
+        yield break;
     }
 
     private void ShowCurrentLine()
@@ -180,30 +205,42 @@ public class DialogueManager : MonoBehaviour
         if (voiceSource != null)
             voiceSource.Stop();
 
-        yield return Fade(0f);
+        if (dialogueRoot != null)
+            dialogueRoot.SetActive(false);
 
-        if (root != null)
-            root.SetActive(false);
+        yield return FadeStoryRoot(0f);
+
+        if (storyRoot != null)
+            storyRoot.SetActive(false);
 
         IsPlaying = false;
         currentSequence = null;
     }
 
-    private IEnumerator Fade(float targetAlpha)
+    private IEnumerator FadeStoryRoot(float targetAlpha)
     {
-        if (canvasGroup == null)
+        if (storyCanvasGroup == null)
             yield break;
 
-        float startAlpha = canvasGroup.alpha;
+        float startAlpha = storyCanvasGroup.alpha;
         float elapsed = 0f;
 
         while (elapsed < fadeDuration)
         {
             elapsed += Time.deltaTime;
-            canvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsed / fadeDuration);
+            storyCanvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsed / fadeDuration);
             yield return null;
         }
 
-        canvasGroup.alpha = targetAlpha;
+        storyCanvasGroup.alpha = targetAlpha;
+    }
+
+    public void HideSharedBackgroundInstant()
+    {
+        if (storyCanvasGroup != null)
+            storyCanvasGroup.alpha = 0f;
+
+        if (storyRoot != null)
+            storyRoot.SetActive(false);
     }
 }
