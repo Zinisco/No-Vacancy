@@ -18,24 +18,39 @@ MonoBehaviour:
   - text: 'Don''t blame you. I wouldn''t either. '
     voiceClip: {fileID: 0}
   - text: Listen. I have my regrets. We both do. Your Mother and I. We were lost
-      for a long time. Kept telling ourselves we were doing our best. Guess that's
-      where we were wrong.
+      for a long time. Kept telling ourselves we were doing our best. Guess we were
+      wrong.
     voiceClip: {fileID: 0}
   - text: "We should\u2019ve been there for you, especially for the times when you
       needed us most. We know that now. "
     voiceClip: {fileID: 0}
   - text: "Your mother talks about you all the time. She keeps asking if you\u2019re
-      ever coming home. I\u2019ll tell her I don\u2019t know"
+      ever coming home. I\u2019ll tell her I don\u2019t know. She doesn't remember
+      how she treated you. But she remembers the good memories she had.  "
     voiceClip: {fileID: 0}
-  - text: 'Anyway, if you do decide to come back. The hotel is yours now. Keys are
-      in the security box by the front doors. Code is 4673. '
+  - text: "Your mother talks about you all the time. She keeps asking if you\u2019re
+      ever coming home. I\u2019ll tell her I don\u2019t know. She doesn't remember
+      how she treated you. But she remembers the good memories she had. Her memory
+      isn't what it used to be. She's starting to forget things. Not just that. More
+      mundane things too. Like where the bathroom is located in the house or what
+      our cat's name is. "
+    voiceClip: {fileID: 0}
+  - text: We had to shut down the hotel once her condition worsened. I'm staying
+      home with her as we try to navigate this together. Through sickness and in
+      health, right?
+    voiceClip: {fileID: 0}
+  - text: 'The hotel is yours now if you want it. Keys are in the security box by
+      the front doors. Code is 4673. '
+    voiceClip: {fileID: 0}
+  - text: 'Remember when we used to play Hide and Seek on the first floor? You used
+      to always hide in room 101 becasue you said it looked like lol and it made
+      you laugh. '
     voiceClip: {fileID: 0}
   - text: Upper floors are blocked off.  Elevator was shut down back in February.
-      We couldn't afford the repairs once the medical bills started to hit.  Can't
-      afford much of anything right now.
+      We couldn't afford the repairs.  Can't afford much of anything right now.
     voiceClip: {fileID: 0}
   - text: Lights still work. Most of the time. And some rooms might need a bit of
-      sprucing up. But I'm sure that's not too much for you to handle
+      sprucing up. But I'm sure that's not too much for you to handle.
     voiceClip: {fileID: 0}
   - text: "\u2026would be nice seeing this place alive again."
     voiceClip: {fileID: 0}

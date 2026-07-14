@@ -92,6 +92,12 @@ public class GuestCard : MonoBehaviour,
     // How quickly the visual hover/selection animation happens.
     [SerializeField] private float visualLerpSpeed = 12f;
 
+    [Header("Satisfaction Emote")]
+    [SerializeField] private GuestEmoteUI emoteUI;
+
+    [Header("Hand Dragging")]
+    [SerializeField] private HandDropZone handDropZone;
+
     [Header("Hover Visual")]
 
     // How high the card rises when hovered.
@@ -151,6 +157,8 @@ public class GuestCard : MonoBehaviour,
     // Target rotation for this card in the hand fan.
     private float targetHandRotationZ;
 
+  
+
     private Canvas rootCanvas;
     private CanvasGroup canvasGroup;
     private Transform dragOriginalParent;
@@ -175,6 +183,9 @@ public class GuestCard : MonoBehaviour,
 
         if (canvasGroup == null)
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
+
+        if(handDropZone == null)
+    handDropZone = FindFirstObjectByType<HandDropZone>();
     }
 
     private void Update()
@@ -230,6 +241,10 @@ public class GuestCard : MonoBehaviour,
 
         isSelected = false;
         isHovered = false;
+
+
+        if (emoteUI != null)
+            emoteUI.Hide();
 
         // Reset visuals and create icons.
         RefreshVisualTargets(true);
@@ -292,6 +307,9 @@ public class GuestCard : MonoBehaviour,
     {
         CurrentLocationType = CardLocationType.Hand;
         CurrentRoom = null;
+
+        if (emoteUI != null)
+            emoteUI.Hide();
     }
 
     // Marks this card as being inside a room.
@@ -763,10 +781,31 @@ public class GuestCard : MonoBehaviour,
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (rootRect == null)
+        if (rootRect == null || eventData == null)
             return;
 
         rootRect.position = eventData.position;
+
+        if (handDropZone == null)
+            return;
+
+        bool isInsideHand = handDropZone.ContainsScreenPoint(
+            eventData.position,
+            eventData.pressEventCamera
+        );
+
+        if (isInsideHand)
+        {
+            handDropZone.PreviewDrop(
+                eventData.position,
+                eventData.pressEventCamera,
+                this
+            );
+        }
+        else
+        {
+            handDropZone.ClearPreview();
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -775,11 +814,67 @@ public class GuestCard : MonoBehaviour,
             canvasGroup.blocksRaycasts = true;
 
         RoomSlot targetRoom = null;
+        bool droppedOnHand = false;
+        int handDropIndex = -1;
 
-        if (eventData.pointerCurrentRaycast.gameObject != null)
-            targetRoom = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<RoomSlot>();
+        if (handDropZone != null)
+        {
+            droppedOnHand = handDropZone.ContainsScreenPoint(
+                eventData.position,
+                eventData.pressEventCamera
+            );
+
+            if (droppedOnHand)
+            {
+                handDropIndex = handDropZone.GetDropIndex(
+                    eventData.position,
+                    eventData.pressEventCamera,
+                    this
+                );
+            }
+            else
+            {
+                handDropZone.ClearPreview();
+            }
+        }
+
+        if (!droppedOnHand)
+        {
+            GameObject hitObject =
+                eventData.pointerCurrentRaycast.gameObject;
+
+            if (hitObject != null)
+            {
+                targetRoom =
+                    hitObject.GetComponentInParent<RoomSlot>();
+            }
+        }
 
         if (gameManager != null)
-            gameManager.OnGuestCardDropped(this, targetRoom);
+        {
+            gameManager.OnGuestCardDropped(
+                this,
+                targetRoom,
+                droppedOnHand,
+                handDropIndex
+            );
+        }
+    }
+
+    public void RefreshSatisfactionEmote()
+    {
+        if (emoteUI == null)
+            return;
+
+        if (CurrentLocationType != CardLocationType.Room || CurrentRoom == null)
+        {
+            emoteUI.Hide();
+            return;
+        }
+
+        if (IsPerfectMatch(CurrentRoom))
+            emoteUI.ShowHappy();
+        else
+            emoteUI.ShowUnhappy();
     }
 }

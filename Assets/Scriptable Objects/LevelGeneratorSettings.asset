@@ -13,22 +13,22 @@ MonoBehaviour:
   m_Name: LevelGeneratorSettings
   m_EditorClassIdentifier: Assembly-CSharp::LevelGeneratorSettings
   outputFolder: Assets/Levels
-  levelNamePrefix: GeneratedLevel
+  levelNamePrefix: ChapterTwo_Level03
   ruleset:
     allowFloorPreferences: 1
     allowAdjacencyRules: 0
     allowBehaviorTraits: 0
     allowRequirements: 1
-    allowedTraits: 000000000100000004000000090000000a000000
+    allowedTraits: 0000000001000000040000000a00000007000000
     allowedBehaviors: 
     allowedRequirements: 0000000001000000
   targetComplexity: 1
   guestCount: 8
   closedRoomRules:
   - floorIndex: 1
-    closedRoomCount: 2
+    closedRoomCount: 0
   - floorIndex: 2
-    closedRoomCount: 4
+    closedRoomCount: 0
   elevatorStatus: 0
   floorCount: 2
   roomsPerFloor: 6

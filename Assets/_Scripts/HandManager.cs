@@ -14,6 +14,9 @@ public class HandManager : MonoBehaviour
     // Usually this is a RectTransform in your Canvas.
     [SerializeField] private RectTransform handContainer;
 
+    [Header("Drag Reordering")]
+    [SerializeField] private float previewGapExtra = 50f;
+
     [Header("Settings")]
 
     // The default maximum number of cards the player can hold.
@@ -37,6 +40,10 @@ public class HandManager : MonoBehaviour
     // "readonly" means the list reference itself cannot be replaced,
     // but we can still add/remove cards from the list.
     private readonly List<GuestCard> cardsInHand = new();
+
+    public int PreviewDropIndex => previewDropIndex;
+    private GuestCard previewDraggedCard;
+    private int previewDropIndex = -1;
 
     // The current hand size limit.
     // This may change during gameplay.
@@ -88,38 +95,191 @@ public class HandManager : MonoBehaviour
     // Adds a card to the player's hand.
     public void AddToHand(GuestCard card, bool reparent = true)
     {
-        // Stop if the card is null.
-        if (card == null) return;
+        AddToHandAtIndex(card, cardsInHand.Count, reparent);
+    }
 
-        // Stop if the card is already in the hand.
-        if (cardsInHand.Contains(card)) return;
+    public void AddToHandAtIndex(
+    GuestCard card,
+    int index,
+    bool reparent = true)
+    {
+        if (card == null)
+            return;
 
-        // Add the card to the internal list.
-        cardsInHand.Add(card);
+        // If this is the card currently creating the preview gap,
+        // clear the preview state before rebuilding the final hand.
+        if (previewDraggedCard == card)
+        {
+            previewDraggedCard = null;
+            previewDropIndex = -1;
+        }
 
-        // If reparent is true,
-        // move the card into the hand container hierarchy.
+        cardsInHand.Remove(card);
+
+        index = Mathf.Clamp(
+            index,
+            0,
+            cardsInHand.Count
+        );
+
+        cardsInHand.Insert(index, card);
+
         if (reparent)
         {
-            // Use the handContainer if assigned,
-            // otherwise use this object's transform.
-            Transform parent = handContainer != null ? handContainer : transform;
+            Transform parent = handContainer != null
+                ? handContainer
+                : transform;
 
-            // Parent the card to the hand container.
-            // false = preserve local UI coordinates.
             card.transform.SetParent(parent, false);
-
-            // Reset transform values so the card starts clean.
             card.transform.localScale = Vector3.one;
             card.transform.localPosition = Vector3.zero;
             card.transform.localRotation = Quaternion.identity;
         }
 
-        // Tell the card that it is now in the hand.
         card.SetInHand();
 
-        // Recalculate the hand layout.
+        UpdateSiblingOrder();
+
+        // This now builds the normal layout because the preview
+        // state was cleared above.
         RefreshHandLayout();
+    }
+
+    public void MoveCardToIndex(
+    GuestCard card,
+    int index)
+    {
+        if (card == null)
+            return;
+
+        int oldIndex = cardsInHand.IndexOf(card);
+
+        if (oldIndex < 0)
+            return;
+
+        cardsInHand.RemoveAt(oldIndex);
+
+        index = Mathf.Clamp(
+            index,
+            0,
+            cardsInHand.Count
+        );
+
+        cardsInHand.Insert(index, card);
+
+        previewDraggedCard = null;
+        previewDropIndex = -1;
+
+        UpdateSiblingOrder();
+        RefreshHandLayout();
+    }
+
+    public int GetDropIndex(
+    Vector2 screenPosition,
+    Camera eventCamera,
+    GuestCard draggedCard)
+    {
+        if (handContainer == null)
+            return cardsInHand.Count;
+
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                handContainer,
+                screenPosition,
+                eventCamera,
+                out Vector2 localPoint))
+        {
+            return cardsInHand.Count;
+        }
+
+        bool cardAlreadyInHand =
+            draggedCard != null &&
+            cardsInHand.Contains(draggedCard);
+
+        int remainingCardCount = cardsInHand.Count;
+
+        if (cardAlreadyInHand)
+            remainingCardCount--;
+
+        int finalCardCount = remainingCardCount + 1;
+
+        if (finalCardCount <= 1)
+            return 0;
+
+        float totalWidth =
+            (finalCardCount - 1) * cardSpacing;
+
+        float firstSlotX =
+            -totalWidth * 0.5f;
+
+        // An insertion boundary sits halfway between slots.
+        float firstBoundaryX =
+            firstSlotX - cardSpacing * 0.5f;
+
+        float positionFromFirstBoundary =
+            localPoint.x - firstBoundaryX;
+
+        int insertionIndex = Mathf.FloorToInt(
+            positionFromFirstBoundary / cardSpacing
+        );
+
+        return Mathf.Clamp(
+            insertionIndex,
+            0,
+            remainingCardCount
+        );
+    }
+
+    public int PreviewDrop(
+    Vector2 screenPosition,
+    Camera eventCamera,
+    GuestCard draggedCard)
+    {
+        int newIndex = GetDropIndex(
+            screenPosition,
+            eventCamera,
+            draggedCard
+        );
+
+        bool previewChanged =
+            previewDraggedCard != draggedCard ||
+            previewDropIndex != newIndex;
+
+        previewDraggedCard = draggedCard;
+        previewDropIndex = newIndex;
+
+        if (previewChanged)
+            RefreshHandLayout();
+
+        return previewDropIndex;
+    }
+
+    public void ClearDropPreview(bool refreshLayout = true)
+    {
+        if (previewDraggedCard == null &&
+            previewDropIndex < 0)
+        {
+            return;
+        }
+
+        previewDraggedCard = null;
+        previewDropIndex = -1;
+
+        if (refreshLayout)
+            RefreshHandLayout();
+    }
+
+    private void UpdateSiblingOrder()
+    {
+        for (int i = 0; i < cardsInHand.Count; i++)
+        {
+            GuestCard card = cardsInHand[i];
+
+            if (card != null &&
+                card.transform.parent == handContainer)
+            {
+                card.transform.SetSiblingIndex(i);
+            }
+        }
     }
 
     // Removes a card from the hand.
@@ -158,53 +318,156 @@ public class HandManager : MonoBehaviour
     // Rebuilds the curved hand layout.
     public void RefreshHandLayout(bool instant = false)
     {
-        // Number of cards currently in hand.
+        bool showingPreview =
+            previewDraggedCard != null &&
+            previewDropIndex >= 0;
+
+        if (!showingPreview)
+        {
+            RefreshNormalHandLayout(instant);
+            return;
+        }
+
+        RefreshPreviewHandLayout(instant);
+    }
+
+    private void RefreshNormalHandLayout(bool instant)
+    {
         int count = cardsInHand.Count;
 
-        // If there are no cards, stop.
-        if (count == 0) return;
+        if (count == 0)
+            return;
 
-        // Calculate total width of the hand.
-        // Example:
-        // 5 cards with 140 spacing = 560 width.
         float totalWidth = (count - 1) * cardSpacing;
-
-        // Calculate where the first card starts.
-        // This centers the entire hand.
         float startX = -totalWidth * 0.5f;
 
-        // Loop through every card in the hand.
         for (int i = 0; i < count; i++)
         {
             GuestCard card = cardsInHand[i];
 
-            if (card == null) continue;
+            if (card == null)
+                continue;
 
-            // Convert card index into a 0-1 range.
-            // Example:
-            // left card = 0
-            // middle = 0.5
-            // right = 1
-            float normalized = count == 1 ? 0.5f : i / (float)(count - 1);
+            float normalized =
+                count == 1
+                    ? 0.5f
+                    : i / (float)(count - 1);
 
-            // Calculate horizontal position.
             float x = startX + i * cardSpacing;
 
-            // Convert normalized into a center offset.
-            // Middle card becomes 0.
             float centerOffset = normalized - 0.5f;
 
-            // Create curved vertical movement.
-            // Cards near the center move upward more.
-            float y = (1f - Mathf.Abs(centerOffset) * 2f) * curveHeight;
+            float y =
+                (1f - Mathf.Abs(centerOffset) * 2f) *
+                curveHeight;
 
-            // Rotate cards outward in a fan shape.
-            // Left side rotates positive.
-            // Right side rotates negative.
-            float zRot = Mathf.Lerp(maxFanRotation, -maxFanRotation, normalized);
+            float zRotation = Mathf.Lerp(
+                maxFanRotation,
+                -maxFanRotation,
+                normalized
+            );
 
-            // Tell the card where it should move/rotate to.
-            card.SetHandPose(new Vector2(x, y), zRot, instant);
+            card.SetHandPose(
+                new Vector2(x, y),
+                zRotation,
+                instant
+            );
+        }
+    }
+
+    private void RefreshPreviewHandLayout(bool instant)
+    {
+        List<GuestCard> remainingCards = new();
+
+        for (int i = 0; i < cardsInHand.Count; i++)
+        {
+            GuestCard card = cardsInHand[i];
+
+            if (card == null || card == previewDraggedCard)
+                continue;
+
+            remainingCards.Add(card);
+        }
+
+        bool draggedCardAlreadyInHand =
+            cardsInHand.Contains(previewDraggedCard);
+
+        if (!draggedCardAlreadyInHand && !HasSpace)
+        {
+            RefreshNormalHandLayout(instant);
+            return;
+        }
+
+        int finalCardCount =
+            remainingCards.Count + 1;
+
+        if (finalCardCount <= 0)
+            return;
+
+        int dropIndex = Mathf.Clamp(
+            previewDropIndex,
+            0,
+            remainingCards.Count
+        );
+
+        float normalTotalWidth =
+            (finalCardCount - 1) * cardSpacing;
+
+        float totalWidth =
+            normalTotalWidth + previewGapExtra;
+
+        float startX =
+            -totalWidth * 0.5f;
+
+        for (int i = 0; i < remainingCards.Count; i++)
+        {
+            GuestCard card = remainingCards[i];
+
+            if (card == null)
+                continue;
+
+            int visualIndex =
+                i < dropIndex
+                    ? i
+                    : i + 1;
+
+            float x =
+                startX + visualIndex * cardSpacing;
+
+            // Push everything to the right of the opening farther right.
+            if (visualIndex > dropIndex)
+                x += previewGapExtra;
+
+            // Split the extra space around the gap.
+            if (visualIndex < dropIndex)
+                x -= previewGapExtra * 0.5f;
+            else if (visualIndex > dropIndex)
+                x += previewGapExtra * 0.5f;
+
+            float normalized =
+                finalCardCount == 1
+                    ? 0.5f
+                    : visualIndex /
+                      (float)(finalCardCount - 1);
+
+            float centerOffset =
+                normalized - 0.5f;
+
+            float y =
+                (1f - Mathf.Abs(centerOffset) * 2f) *
+                curveHeight;
+
+            float zRotation = Mathf.Lerp(
+                maxFanRotation,
+                -maxFanRotation,
+                normalized
+            );
+
+            card.SetHandPose(
+                new Vector2(x, y),
+                zRotation,
+                instant
+            );
         }
     }
 }

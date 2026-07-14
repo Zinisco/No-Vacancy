@@ -69,7 +69,7 @@ public static class LevelGenerator
                     floorIndex = floorNumber,
                     columnIndex = column,
                     availability = RoomAvailability.Open,
-                    traits = GenerateRoomTraits(settings)
+                    traits = GenerateRoomTraits(settings, floorNumber)
                 };
                 floorSlots.Add(room);
             }
@@ -81,7 +81,7 @@ public static class LevelGenerator
             slots.Add(floorSlots[i]);
     }
 
-    private static List<RoomTrait> GenerateRoomTraits(LevelGeneratorSettings settings)
+    private static List<RoomTrait> GenerateRoomTraits(LevelGeneratorSettings settings, int floorNumber)
     {
         List<RoomTrait> pool = new();
 
@@ -95,6 +95,9 @@ public static class LevelGenerator
             RoomTrait trait = traitSource[i];
 
             if (trait == RoomTrait.NearElevator)
+                continue;
+
+            if (trait == RoomTrait.Balcony && floorNumber < 2)
                 continue;
 
             pool.Add(trait);
@@ -324,7 +327,7 @@ public static class LevelGenerator
         if (sourceRoom.floorIndex == 2)
             possible.Add(FloorPreference.SecondFloor);
 
-        if (sourceRoom.floorIndex == topFloor)
+        if (topFloor >= 3 && sourceRoom.floorIndex == 3)
             possible.Add(FloorPreference.ThirdFloor);
 
         // Optional: randomly give 0 or 1 floor preferences.

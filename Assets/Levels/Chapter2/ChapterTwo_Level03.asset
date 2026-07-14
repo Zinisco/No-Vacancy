@@ -1,0 +1,162 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 993aaf6be17430048bcf3c4c153a53a7, type: 3}
+  m_Name: ChapterTwo_Level03
+  m_EditorClassIdentifier: Assembly-CSharp::LevelConfig
+  rooms:
+  - roomNumber: 103
+    slotType: 0
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 1
+    columnIndex: 0
+    traits: 010000000400000009000000
+  - roomNumber: 102
+    slotType: 0
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 1
+    columnIndex: 1
+    traits: 0400000000000000
+  - roomNumber: 101
+    slotType: 0
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 1
+    columnIndex: 2
+    traits: 04000000090000000100000005000000
+  - roomNumber: E1
+    slotType: 1
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 1
+    columnIndex: 3
+    traits: 
+  - roomNumber: 104
+    slotType: 0
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 1
+    columnIndex: 4
+    traits: 090000000000000005000000
+  - roomNumber: 105
+    slotType: 0
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 1
+    columnIndex: 5
+    traits: 0000000009000000
+  - roomNumber: 106
+    slotType: 0
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 1
+    columnIndex: 6
+    traits: 000000000400000009000000
+  - roomNumber: 203
+    slotType: 0
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 2
+    columnIndex: 0
+    traits: 0000000004000000
+  - roomNumber: 202
+    slotType: 0
+    availability: 1
+    elevatorStatus: 0
+    floorIndex: 2
+    columnIndex: 1
+    traits: 070000000000000004000000
+  - roomNumber: 201
+    slotType: 0
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 2
+    columnIndex: 2
+    traits: 07000000000000000400000005000000
+  - roomNumber: E2
+    slotType: 1
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 2
+    columnIndex: 3
+    traits: 
+  - roomNumber: 204
+    slotType: 0
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 2
+    columnIndex: 4
+    traits: 01000000070000000400000005000000
+  - roomNumber: 205
+    slotType: 0
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 2
+    columnIndex: 5
+    traits: 000000000900000007000000
+  - roomNumber: 206
+    slotType: 0
+    availability: 0
+    elevatorStatus: 0
+    floorIndex: 2
+    columnIndex: 6
+    traits: 0700000000000000
+  guests:
+  - guestName: Morgan
+    preferredTraits: 0500000000000000
+    preferredFloorPreferences: 
+    adjacencyPreferences: []
+    behaviorTraits: 
+    requirements: 
+  - guestName: Elliot
+    preferredTraits: 00000000
+    preferredFloorPreferences: 00000000
+    adjacencyPreferences: []
+    behaviorTraits: 
+    requirements: 
+  - guestName: Emerson
+    preferredTraits: 0000000004000000
+    preferredFloorPreferences: 
+    adjacencyPreferences: []
+    behaviorTraits: 
+    requirements: 00000000
+  - guestName: Casey
+    preferredTraits: 0400000000000000
+    preferredFloorPreferences: 00000000
+    adjacencyPreferences: []
+    behaviorTraits: 
+    requirements: 
+  - guestName: Dakota
+    preferredTraits: 0100000004000000
+    preferredFloorPreferences: 
+    adjacencyPreferences: []
+    behaviorTraits: 
+    requirements: 01000000
+  - guestName: Sam
+    preferredTraits: 0400000001000000
+    preferredFloorPreferences: 01000000
+    adjacencyPreferences: []
+    behaviorTraits: 
+    requirements: 
+  - guestName: Riley
+    preferredTraits: 040000000700000005000000
+    preferredFloorPreferences: 01000000
+    adjacencyPreferences: []
+    behaviorTraits: 
+    requirements: 
+  - guestName: Chris
+    preferredTraits: 0000000004000000
+    preferredFloorPreferences: 01000000
+    adjacencyPreferences: []
+    behaviorTraits: 
+    requirements: 

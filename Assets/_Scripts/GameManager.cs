@@ -515,29 +515,45 @@ public class GameManager : MonoBehaviour
 
         yield return StartCoroutine(AddRoomCardBackToHand(roomCard));
 
+        RefreshAllGuestEmotes();
         RefreshSubmitButtonState();
         Log($"Returned {roomCard.DisplayName} to hand.");
     }
 
     // Animates a card moving back to the hand and adds it to the hand manager.
-    private IEnumerator AddRoomCardBackToHand(GuestCard card)
+    private IEnumerator AddRoomCardBackToHand(
+    GuestCard card,
+    int insertionIndex = -1)
     {
         if (card == null)
             yield break;
 
-        Transform handParent = handManager.GetHandContainer();
+        Transform handParent =
+            handManager.GetHandContainer();
 
-        card.transform.SetParent(handParent, false);
+        card.transform.SetParent(handParent, true);
         card.transform.localScale = Vector3.one;
-        card.transform.localRotation = Quaternion.identity;
 
-        handManager.AddToHand(card, false);
-        handManager.RefreshHandLayout();
+        if (insertionIndex < 0)
+            insertionIndex = handManager.CurrentHandCount;
+
+        // Remove the temporary drag gap without first restoring
+        // the old layout.
+        handManager.ClearDropPreview(false);
+
+        handManager.AddToHandAtIndex(
+            card,
+            insertionIndex,
+            false
+        );
+
         Canvas.ForceUpdateCanvases();
 
-        card.SetHandPoseLerpEnabled(true);
+        card.SetHandPoseLerpEnabled(false);
 
-        yield return StartCoroutine(cardAnimationController.AnimateCardToHandPose(card));
+        yield return StartCoroutine(
+            cardAnimationController.AnimateCardToHandPose(card)
+        );
     }
 
     #endregion
@@ -732,6 +748,8 @@ public class GameManager : MonoBehaviour
     // Common cleanup after any card interaction, such as deselecting and refreshing UI states.
     private void FinishInteraction()
     {
+        RefreshAllGuestEmotes();
+
         DeselectCurrentSelection();
 
         isBusy = false;
@@ -900,6 +918,19 @@ public class GameManager : MonoBehaviour
         return placedGuests >= levelConfig.guests.Count;
     }
 
+    private void RefreshAllGuestEmotes()
+    {
+        for (int i = 0; i < roomSlots.Count; i++)
+        {
+            RoomSlot room = roomSlots[i];
+
+            if (!room.HasCard() || room.CurrentCard == null)
+                continue;
+
+            room.CurrentCard.RefreshSatisfactionEmote();
+        }
+    }
+
     #endregion
 
     #region UI Helpers
@@ -990,22 +1021,96 @@ public class GameManager : MonoBehaviour
         gameUIController?.SetSubmitButtonState(canSubmit);
     }
 
-    public void OnGuestCardDropped(GuestCard card, RoomSlot targetRoom)
+    public void OnGuestCardDropped(
+    GuestCard card,
+    RoomSlot targetRoom,
+    bool droppedOnHand,
+    int handDropIndex)
     {
         if (card == null || isBusy || levelSubmitted)
             return;
 
-        StartCoroutine(HandleCardDroppedRoutine(card, targetRoom));
+        StartCoroutine(
+            HandleCardDroppedRoutine(
+                card,
+                targetRoom,
+                droppedOnHand,
+                handDropIndex
+            )
+        );
     }
 
-    private IEnumerator HandleCardDroppedRoutine(GuestCard card, RoomSlot targetRoom)
+    private IEnumerator HandleCardDroppedRoutine(
+    GuestCard card,
+    RoomSlot targetRoom,
+    bool droppedOnHand,
+    int handDropIndex)
     {
         isBusy = true;
         RefreshSubmitButtonState();
 
+        // The card was dropped over the hand area.
+        if (droppedOnHand)
+        {
+            if (card.CurrentLocationType == CardLocationType.Room &&
+                card.CurrentRoom != null)
+            {
+                if (!handManager.HasSpace)
+                {
+                    Log("Hand is full.");
+
+                    yield return StartCoroutine(
+                        ReturnDraggedCardToCurrentLocation(card)
+                    );
+
+                    isBusy = false;
+                    RefreshSubmitButtonState();
+                    yield break;
+                }
+
+                RoomSlot previousRoom = card.CurrentRoom;
+                previousRoom.ClearCard();
+
+                card.SetSelected(false);
+
+                yield return StartCoroutine(
+                    AddRoomCardBackToHand(
+                        card,
+                        handDropIndex
+                    )
+                );
+
+                RefreshAllGuestEmotes();
+                DeselectCurrentSelection();
+
+                isBusy = false;
+                RefreshSubmitButtonState();
+                CheckWinState();
+                yield break;
+            }
+
+            if (card.CurrentLocationType == CardLocationType.Hand)
+            {
+                yield return StartCoroutine(
+                    ReorderCardInHand(
+                        card,
+                        handDropIndex
+                    )
+                );
+
+                isBusy = false;
+                RefreshSubmitButtonState();
+                yield break;
+            }
+        }
+
+        // Dropped somewhere that is neither the hand nor a usable room.
         if (targetRoom == null || !targetRoom.CanAcceptGuest)
         {
-            yield return StartCoroutine(ReturnDraggedCardToCurrentLocation(card));
+            yield return StartCoroutine(
+                ReturnDraggedCardToCurrentLocation(card)
+            );
+
             isBusy = false;
             RefreshSubmitButtonState();
             yield break;
@@ -1015,28 +1120,39 @@ public class GameManager : MonoBehaviour
         {
             if (!targetRoom.HasCard())
             {
-                yield return StartCoroutine(MoveHandCardToRoom(card, targetRoom));
+                yield return StartCoroutine(
+                    MoveHandCardToRoom(card, targetRoom)
+                );
             }
             else
             {
-                yield return StartCoroutine(SwapHandCardWithRoomCard(card, targetRoom));
+                yield return StartCoroutine(
+                    SwapHandCardWithRoomCard(card, targetRoom)
+                );
             }
         }
-        else if (card.CurrentLocationType == CardLocationType.Room && card.CurrentRoom != null)
+        else if (card.CurrentLocationType == CardLocationType.Room &&
+                 card.CurrentRoom != null)
         {
             RoomSlot fromRoom = card.CurrentRoom;
 
             if (fromRoom == targetRoom)
             {
-                yield return StartCoroutine(ReturnDraggedCardToCurrentLocation(card));
+                yield return StartCoroutine(
+                    ReturnDraggedCardToCurrentLocation(card)
+                );
             }
             else if (!targetRoom.HasCard())
             {
-                yield return StartCoroutine(MoveRoomCardToEmptyRoom(fromRoom, targetRoom));
+                yield return StartCoroutine(
+                    MoveRoomCardToEmptyRoom(fromRoom, targetRoom)
+                );
             }
             else
             {
-                yield return StartCoroutine(SwapRoomCards(fromRoom, targetRoom));
+                yield return StartCoroutine(
+                    SwapRoomCards(fromRoom, targetRoom)
+                );
             }
         }
 
@@ -1071,6 +1187,36 @@ public class GameManager : MonoBehaviour
         }
 
         card.SetHandPoseLerpEnabled(true);
+    }
+
+    private IEnumerator ReorderCardInHand(
+    GuestCard card,
+    int insertionIndex)
+    {
+        if (card == null)
+            yield break;
+
+        Transform handParent =
+            handManager.GetHandContainer();
+
+        // Keep the card's current screen position when moving it
+        // back under the hand container.
+        card.transform.SetParent(handParent, true);
+        card.transform.localScale = Vector3.one;
+
+        // Change the list order and assign all new hand poses.
+        handManager.MoveCardToIndex(
+            card,
+            insertionIndex
+        );
+
+        Canvas.ForceUpdateCanvases();
+
+        // Let GuestCard.Update smoothly move the dragged card
+        // and every neighboring card to the new layout.
+        card.SetHandPoseLerpEnabled(true);
+
+        yield return null;
     }
 
     public void OnRetryButtonPressed()

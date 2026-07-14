@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fc86adc97d87894e88fc83b7baafd2b, type: 3}
+  m_Name: Guest Emote Database
+  m_EditorClassIdentifier: Assembly-CSharp::GuestEmoteDatabase
+  happyEmotes:
+  - {fileID: 2055012193, guid: 8c4aa76196b3ba146be9d1d98aee0a3b, type: 3}
+  - {fileID: -86517560, guid: 8c4aa76196b3ba146be9d1d98aee0a3b, type: 3}
+  unhappyEmotes:
+  - {fileID: 822113785, guid: 8c4aa76196b3ba146be9d1d98aee0a3b, type: 3}
+  - {fileID: 2078509361, guid: 8c4aa76196b3ba146be9d1d98aee0a3b, type: 3}
+  - {fileID: -1550013283, guid: 8c4aa76196b3ba146be9d1d98aee0a3b, type: 3}

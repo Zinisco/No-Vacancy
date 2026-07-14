@@ -13,14 +13,18 @@ MonoBehaviour:
   m_Name: Chapter Two Dialogue
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
   lines:
-  - text: The inspector called. Told me the Elevator is all set. Was this you?
+  - text: The inspector called. Told me the Elevator is all set. Was this your doing?
     voiceClip: {fileID: 0}
-  - text: 'If that''s the case. Then, it''s good to have you back in town.   '
+  - text: 'If that''s the case. Then, it''s good to have you back in town.  I''m
+      glad to hear your taking up the family business. '
     voiceClip: {fileID: 0}
-  - text: Your Mother will be so excited to hear that you took it under your wing.
+  - text: ' '
     voiceClip: {fileID: 0}
-  - text: 'Careful of the second floor. Many of the balconies were left unstable.
-      Best to keep those rooms closed off for now. '
+  - text: It would be nice to see her smile again.
+    voiceClip: {fileID: 0}
+  - text: 'By the way, when you go up the elevator, be careful of the second floor.
+      Many of the balconies were left unstable. Best to keep those rooms closed off
+      for now. '
     voiceClip: {fileID: 0}
   - text: 'I know your busy now, but it would be great to hear your voice. You don''t
       have to stop by the house, but it would be nice to receive a call from you
