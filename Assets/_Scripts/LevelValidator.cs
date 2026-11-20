@@ -46,6 +46,18 @@ public static class LevelValidator
         return solutionCount == 1;
     }
 
+    public static bool HasSolution(
+    List<GeneratedRoomData> slots,
+    List<GeneratedGuestData> guests)
+    {
+        if (!CanSolve(slots, guests))
+            return false;
+
+        List<GeneratedRoomData> rooms = GetRoomSlots(slots);
+
+        return CountSolutions(rooms, guests, 1) > 0;
+    }
+
     public static bool IsInterestingPuzzle(List<GeneratedRoomData> slots, List<GeneratedGuestData> guests, float ambiguityThreshold = 0.5f)
     {
         if (!CanSolve(slots, guests))
@@ -72,7 +84,7 @@ public static class LevelValidator
             return false;
 
         int solutionCount = CountSolutions(rooms, guests, 2);
-        return solutionCount == 1;
+        return CountSolutions(rooms, guests, 1) > 0;
     }
 
     public static int CountMatchingRoomsForGuest(List<GeneratedRoomData> slots, GeneratedGuestData guest)
@@ -258,7 +270,7 @@ public static class LevelValidator
                 return room.floorIndex == 2;
 
             case FloorPreference.ThirdFloor:
-                return room.floorIndex == 3;
+                return room.floorIndex == topFloor;
 
             default:
                 return false;
@@ -286,20 +298,22 @@ public static class LevelValidator
     }
 
     private static bool AdjacencyPreferenceSatisfied(
-    GuestAdjacencyPreference pref,
-    int guestIndex,
-    GeneratedRoomData guestRoom,
-    List<GeneratedRoomData> rooms,
-    List<GeneratedGuestData> guests,
-    int[] guestToRoom)
+       GuestAdjacencyPreference pref,
+       int guestIndex,
+       GeneratedRoomData guestRoom,
+       List<GeneratedRoomData> rooms,
+       List<GeneratedGuestData> guests,
+       int[] guestToRoom)
     {
-        for (int otherGuestIndex = 0; otherGuestIndex < guests.Count; otherGuestIndex++)
+        bool foundNamedNeighbor = false;
+
+        for (int i = 0; i < guests.Count; i++)
         {
-            if (otherGuestIndex == guestIndex)
+            if (i == guestIndex)
                 continue;
 
-            GeneratedGuestData otherGuest = guests[otherGuestIndex];
-            GeneratedRoomData otherRoom = rooms[guestToRoom[otherGuestIndex]];
+            GeneratedGuestData otherGuest = guests[i];
+            GeneratedRoomData otherRoom = rooms[guestToRoom[i]];
 
             bool adjacent = AreRoomsAdjacent(guestRoom, otherRoom);
             bool noiseAdjacent = AreRoomsNoiseAdjacent(guestRoom, otherRoom);
@@ -307,26 +321,27 @@ public static class LevelValidator
             switch (pref.type)
             {
                 case GuestAdjacencyPreferenceType.HatesSmokingNeighbor:
-                    if (adjacent && otherGuest.behaviorTraits.Contains(GuestBehaviorTrait.Smokes))
+                    if (adjacent &&
+                        otherGuest.behaviorTraits.Contains(GuestBehaviorTrait.Smokes))
                         return false;
                     break;
 
                 case GuestAdjacencyPreferenceType.HatesLoudNeighbor:
                     if (noiseAdjacent &&
-                        (otherGuest.behaviorTraits.Contains(GuestBehaviorTrait.Parties) ||
-                         otherGuest.behaviorTraits.Contains(GuestBehaviorTrait.Snores)))
+                        (otherGuest.behaviorTraits.Contains(GuestBehaviorTrait.Parties)))
                         return false;
                     break;
 
                 case GuestAdjacencyPreferenceType.WantsNamedGuestNeighbor:
-                    if (otherGuest.guestName == pref.targetGuestName && adjacent)
-                        return true;
+                    if (adjacent &&
+                        otherGuest.guestName == pref.targetGuestName)
+                        foundNamedNeighbor = true;
                     break;
             }
         }
 
         if (pref.type == GuestAdjacencyPreferenceType.WantsNamedGuestNeighbor)
-            return false;
+            return foundNamedNeighbor;
 
         return true;
     }

@@ -710,9 +710,6 @@ public class GuestCard : MonoBehaviour,
 
             if (card.HasBehaviorTrait(GuestBehaviorTrait.Parties))
                 return true;
-
-            if (card.HasBehaviorTrait(GuestBehaviorTrait.Snores))
-                return true;
         }
 
         return false;

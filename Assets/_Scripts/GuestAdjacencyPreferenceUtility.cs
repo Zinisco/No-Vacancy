@@ -13,6 +13,9 @@ public static class GuestAdjacencyPreferenceUtility
             case GuestAdjacencyPreferenceType.WantsNamedGuestNeighbor:
                 return $"Wants to be near {preference.targetGuestName}";
 
+            case GuestAdjacencyPreferenceType.AllergicToPets:
+                return "Allergic to Pets";
+
             default:
                 return preference.type.ToString();
         }

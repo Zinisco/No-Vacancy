@@ -13,9 +13,44 @@ MonoBehaviour:
   m_Name: ChapterOneConfig
   m_EditorClassIdentifier: Assembly-CSharp::ChapterConfig
   chapterName: New Beginnings
-  levels:
-  - {fileID: 11400000, guid: 3b8a071dc1349644c8877fbf28384eec, type: 2}
-  - {fileID: 11400000, guid: 7da358681762d084a938255d976e016e, type: 2}
-  - {fileID: 11400000, guid: 46902c0d9b3d09d489fbfff221e38cf9, type: 2}
-  - {fileID: 11400000, guid: 1b2361658e726cd4fbc1b7aa6d1dbeee, type: 2}
-  - {fileID: 11400000, guid: 822ddcd317bf3e940881d314a887b81b, type: 2}
+  levelCount: 6
+  baseGeneratorSettings: {fileID: 11400000, guid: 4547c4cf59b79d34095e89be883e81b1, type: 2}
+  difficultySteps:
+  - startingLevel: 0
+    guestCount: 2
+    minPreferencesPerGuest: 2
+    maxPreferencesPerGuest: 3
+    closedRoomRules:
+    - floorIndex: 1
+      closedRoomCount: 3
+    unlockRoomTraits: 
+    unlockBehaviors: 
+    unlockRequirements: 
+    unlockFloorPreferences: 0
+    unlockAdjacencyRules: 0
+    unlockBehaviorTraits: 0
+    unlockGuestRequirements: 0
+  - startingLevel: 3
+    guestCount: 3
+    minPreferencesPerGuest: 2
+    maxPreferencesPerGuest: 3
+    closedRoomRules: []
+    unlockRoomTraits: 09000000
+    unlockBehaviors: 
+    unlockRequirements: 00000000
+    unlockFloorPreferences: 0
+    unlockAdjacencyRules: 0
+    unlockBehaviorTraits: 0
+    unlockGuestRequirements: 1
+  - startingLevel: 5
+    guestCount: 5
+    minPreferencesPerGuest: 2
+    maxPreferencesPerGuest: 3
+    closedRoomRules: []
+    unlockRoomTraits: 0a000000
+    unlockBehaviors: 
+    unlockRequirements: 
+    unlockFloorPreferences: 0
+    unlockAdjacencyRules: 0
+    unlockBehaviorTraits: 0
+    unlockGuestRequirements: 0

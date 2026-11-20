@@ -13,9 +13,54 @@ MonoBehaviour:
   m_Name: ChapterTwoConfig
   m_EditorClassIdentifier: Assembly-CSharp::ChapterConfig
   chapterName: Going Up
-  levels:
-  - {fileID: 11400000, guid: b57976759cf575545a8dc35168d7d150, type: 2}
-  - {fileID: 11400000, guid: 483a3c62f1b1dff4cbbcd11f49acd74e, type: 2}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  levelCount: 6
+  baseGeneratorSettings: {fileID: 11400000, guid: b0fb90e3449d7d14fa35f37e2774b1ef, type: 2}
+  difficultySteps:
+  - startingLevel: 0
+    guestCount: 6
+    minPreferencesPerGuest: 2
+    maxPreferencesPerGuest: 3
+    closedRoomRules:
+    - floorIndex: 2
+      closedRoomCount: 3
+    - floorIndex: 1
+      closedRoomCount: 0
+    unlockRoomTraits: 05000000
+    unlockBehaviors: 
+    unlockRequirements: 01000000
+    unlockFloorPreferences: 1
+    unlockAdjacencyRules: 0
+    unlockBehaviorTraits: 0
+    unlockGuestRequirements: 1
+  - startingLevel: 3
+    guestCount: 7
+    minPreferencesPerGuest: 2
+    maxPreferencesPerGuest: 3
+    closedRoomRules:
+    - floorIndex: 1
+      closedRoomCount: 0
+    - floorIndex: 2
+      closedRoomCount: 2
+    unlockRoomTraits: 04000000
+    unlockBehaviors: 
+    unlockRequirements: 
+    unlockFloorPreferences: 1
+    unlockAdjacencyRules: 0
+    unlockBehaviorTraits: 0
+    unlockGuestRequirements: 1
+  - startingLevel: 5
+    guestCount: 8
+    minPreferencesPerGuest: 2
+    maxPreferencesPerGuest: 3
+    closedRoomRules:
+    - floorIndex: 1
+      closedRoomCount: 0
+    - floorIndex: 2
+      closedRoomCount: 0
+    unlockRoomTraits: 07000000
+    unlockBehaviors: 
+    unlockRequirements: 
+    unlockFloorPreferences: 1
+    unlockAdjacencyRules: 0
+    unlockBehaviorTraits: 0
+    unlockGuestRequirements: 1

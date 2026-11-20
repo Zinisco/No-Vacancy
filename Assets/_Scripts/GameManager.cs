@@ -51,6 +51,14 @@ public class GameManager : MonoBehaviour
     [Header("Level Data")]
     [SerializeField] private LevelConfig levelConfig;
 
+    [Header("Play Mode Testing")]
+    [SerializeField] private ChapterConfig testChapter;
+
+    [SerializeField] private bool skipIntroDuringTesting = true;
+
+    private static int testPuzzleSeed;
+    private static bool hasTestPuzzleSeed;
+
     [Header("Draw Settings")]
     [SerializeField] private int drawAmountPerRefill = 3;
     [SerializeField] private float drawStaggerDelay = 0.03f;
@@ -65,11 +73,49 @@ public class GameManager : MonoBehaviour
 
     #region Unity Lifecycle
 
+
+
     private void Start()
     {
-        if (LevelProgressManager.Instance != null)
+        LevelProgressManager manager = LevelProgressManager.Instance;
+
+        // Direct Game scene testing:
+        // Create a progression manager if one doesn't exist.
+        if (manager == null && testChapter != null)
         {
-            levelConfig = LevelProgressManager.Instance.CurrentLevelConfig;
+            GameObject managerObject =
+                new GameObject("LevelProgressManager");
+
+            manager = managerObject.AddComponent<LevelProgressManager>();
+
+            manager.ConfigureForTesting(testChapter);
+        }
+
+        // A progression manager exists but no puzzle has been
+        // generated yet. Start at Level 1.
+        if (manager != null && manager.CurrentLevelConfig == null)
+        {
+            if (testChapter != null)
+            {
+                manager.ConfigureForTesting(testChapter);
+                manager.StartNewGame();
+
+                if (skipIntroDuringTesting)
+                    manager.MarkIntroDialoguePlayed();
+
+                return;
+            }
+
+            Debug.LogError(
+                "LevelProgressManager has no generated puzzle. " +
+                "Assign a Test Chapter or start through the main menu.");
+            return;
+        }
+
+        // Retrieve the generated puzzle.
+        if (manager != null)
+        {
+            levelConfig = manager.CurrentLevelConfig;
         }
 
         if (!ValidateReferences())
@@ -78,8 +124,8 @@ public class GameManager : MonoBehaviour
         InitializeRooms();
 
         bool shouldPlayIntro =
-            LevelProgressManager.Instance != null &&
-            LevelProgressManager.Instance.ShouldPlayIntroDialogue &&
+            manager != null &&
+            manager.ShouldPlayIntroDialogue &&
             introDialogue != null &&
             DialogueManager.Instance != null;
 
@@ -93,6 +139,7 @@ public class GameManager : MonoBehaviour
             StartGame();
         }
     }
+
 
 
     //Check that all necessary references are assigned, then initialize the rooms and start the game.
@@ -784,7 +831,8 @@ public class GameManager : MonoBehaviour
 
             for (int e = 0; e < elevators.Count; e++)
             {
-                if (slot.IsAdjacentTo(elevators[e]))
+                if (!elevators[e].IsBrokenElevator &&
+    slot.IsAdjacentTo(elevators[e]))
                 {
                     nearElevator = true;
                     break;
@@ -1241,6 +1289,14 @@ public class GameManager : MonoBehaviour
 
         InitializeRooms();
         StartGame();
+    }
+
+    private void RetryTestLevel()
+    {
+        // Reload the current scene.
+        // The existing test puzzle will be regenerated
+        // unless we preserve its seed.
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     #endregion

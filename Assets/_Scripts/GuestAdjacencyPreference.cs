@@ -5,7 +5,8 @@ public enum GuestAdjacencyPreferenceType
 {
     HatesSmokingNeighbor,
     HatesLoudNeighbor,
-    WantsNamedGuestNeighbor
+    WantsNamedGuestNeighbor,
+    AllergicToPets,
 }
 
 [Serializable]

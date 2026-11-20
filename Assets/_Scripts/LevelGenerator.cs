@@ -69,7 +69,12 @@ public static class LevelGenerator
                     floorIndex = floorNumber,
                     columnIndex = column,
                     availability = RoomAvailability.Open,
-                    traits = GenerateRoomTraits(settings, floorNumber)
+                    traits = GenerateRoomTraits(
+    settings,
+    floorNumber,
+    settings.elevatorStatus == ElevatorStatus.Working &&
+    Mathf.Abs(column - elevatorColumn) == 1
+)
                 };
                 floorSlots.Add(room);
             }
@@ -81,19 +86,20 @@ public static class LevelGenerator
             slots.Add(floorSlots[i]);
     }
 
-    private static List<RoomTrait> GenerateRoomTraits(LevelGeneratorSettings settings, int floorNumber)
+
+    private static List<RoomTrait> GenerateRoomTraits(
+        LevelGeneratorSettings settings,
+        int floorNumber,
+        bool nearWorkingElevator)
     {
         List<RoomTrait> pool = new();
 
-        if (settings.ruleset == null || settings.ruleset.allowedTraits == null)
+        if (settings.ruleset == null ||
+            settings.ruleset.allowedTraits == null)
             return pool;
 
-        List<RoomTrait> traitSource = settings.ruleset.allowedTraits;
-
-        for (int i = 0; i < traitSource.Count; i++)
+        foreach (RoomTrait trait in settings.ruleset.allowedTraits)
         {
-            RoomTrait trait = traitSource[i];
-
             if (trait == RoomTrait.NearElevator)
                 continue;
 
@@ -105,15 +111,29 @@ public static class LevelGenerator
 
         Shuffle(pool);
 
-        int targetCount = Random.Range(settings.minTraitsPerRoom, settings.maxTraitsPerRoom + 1);
-        targetCount = Mathf.Clamp(targetCount, 1, pool.Count);
+        int reservedTraits = nearWorkingElevator ? 1 : 0;
+
+        int minRandomTraits = Mathf.Max(
+            0,
+            settings.minTraitsPerRoom - reservedTraits
+        );
+
+        int maxRandomTraits = Mathf.Max(
+            0,
+            settings.maxTraitsPerRoom - reservedTraits
+        );
+
+        int targetCount = Random.Range(
+            minRandomTraits,
+            maxRandomTraits + 1
+        );
+
+        targetCount = Mathf.Clamp(targetCount, 0, pool.Count);
 
         List<RoomTrait> result = new();
 
-        for (int i = 0; i < pool.Count; i++)
+        foreach (RoomTrait candidate in pool)
         {
-            RoomTrait candidate = pool[i];
-
             if (result.Contains(candidate))
                 continue;
 
@@ -126,11 +146,9 @@ public static class LevelGenerator
                 break;
         }
 
-        if (result.Count == 0 && pool.Count > 0)
-            result.Add(pool[0]);
-
         return result;
     }
+
 
     private static void AssignRoomNumbersByElevatorPattern(
      List<GeneratedRoomData> floorSlots,
@@ -197,7 +215,8 @@ public static class LevelGenerator
                 if (slot.floorIndex != other.floorIndex)
                     continue;
 
-                if (Mathf.Abs(slot.columnIndex - other.columnIndex) == 1)
+                if (other.elevatorStatus == ElevatorStatus.Working &&
+     Mathf.Abs(slot.columnIndex - other.columnIndex) == 1)
                 {
                     nearElevator = true;
                     break;
@@ -433,6 +452,11 @@ public static class LevelGenerator
             for (int i = 0; i < closedCount; i++)
             {
                 roomsOnFloor[i].availability = RoomAvailability.Closed;
+
+                Debug.Log(
+                    $"Closed room {roomsOnFloor[i].roomNumber} " +
+                    $"on floor {roomsOnFloor[i].floorIndex}"
+                );
             }
         }
     }

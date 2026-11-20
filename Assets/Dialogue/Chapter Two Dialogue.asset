@@ -12,23 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d22778bf57e3fca41942264a944f8db6, type: 3}
   m_Name: Chapter Two Dialogue
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSequence
-  lines:
-  - text: The inspector called. Told me the Elevator is all set. Was this your doing?
-    voiceClip: {fileID: 0}
-  - text: 'If that''s the case. Then, it''s good to have you back in town.  I''m
-      glad to hear your taking up the family business. '
-    voiceClip: {fileID: 0}
-  - text: ' '
-    voiceClip: {fileID: 0}
-  - text: It would be nice to see her smile again.
-    voiceClip: {fileID: 0}
-  - text: 'By the way, when you go up the elevator, be careful of the second floor.
-      Many of the balconies were left unstable. Best to keep those rooms closed off
-      for now. '
-    voiceClip: {fileID: 0}
-  - text: 'I know your busy now, but it would be great to hear your voice. You don''t
-      have to stop by the house, but it would be nice to receive a call from you
-      whenever you get the chance. '
-    voiceClip: {fileID: 0}
-  - text: Good luck. We're rooting for you.
-    voiceClip: {fileID: 0}
+  lines: []

@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5457390071fbad44fa435564b3e59a56, type: 3}
+  m_Name: ChapterTwoLevelGeneratorSettings
+  m_EditorClassIdentifier: Assembly-CSharp::LevelGeneratorSettings
+  outputFolder: Assets/Levels
+  levelNamePrefix: ChapterTwo
+  ruleset:
+    allowFloorPreferences: 1
+    allowAdjacencyRules: 0
+    allowBehaviorTraits: 0
+    allowRequirements: 0
+    allowedTraits: 00000000010000000300000002000000090000000a00000005000000
+    allowedBehaviors: 
+    allowedRequirements: 0000000001000000
+  targetComplexity: 1
+  guestCount: 6
+  closedRoomRules:
+  - floorIndex: 0
+    closedRoomCount: 0
+  - floorIndex: 1
+    closedRoomCount: 3
+  elevatorStatus: 0
+  floorCount: 2
+  roomsPerFloor: 6
+  topFloorFirst: 0
+  elevatorColumnIndex: 3
+  minTraitsPerRoom: 2
+  maxTraitsPerRoom: 4
+  minPreferencesPerGuest: 2
+  maxPreferencesPerGuest: 4
+  possibleGuestNames:
+  - Alex
+  - Jordan
+  - Taylor
+  - Sam
+  - Morgan
+  - Chris
+  - Jamie
+  - Riley
+  - Casey
+  - Avery
+  - Logan
+  - Elliot
+  - Dakota
+  - Quinn
+  - Charlie
+  - Emerson
+  - Blake
+  - Rowan
+  - Hayden
+  - Skyler
+  - Kerri

@@ -10,34 +10,32 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5457390071fbad44fa435564b3e59a56, type: 3}
-  m_Name: LevelGeneratorSettings
+  m_Name: ChapterOneLevelGeneratorSettings
   m_EditorClassIdentifier: Assembly-CSharp::LevelGeneratorSettings
   outputFolder: Assets/Levels
-  levelNamePrefix: ChapterTwo_Level03
+  levelNamePrefix: ChapterOne_Levell01
   ruleset:
-    allowFloorPreferences: 1
+    allowFloorPreferences: 0
     allowAdjacencyRules: 0
     allowBehaviorTraits: 0
-    allowRequirements: 1
-    allowedTraits: 0000000001000000040000000a00000007000000
+    allowRequirements: 0
+    allowedTraits: 00000000010000000300000002000000
     allowedBehaviors: 
-    allowedRequirements: 0000000001000000
-  targetComplexity: 1
-  guestCount: 8
+    allowedRequirements: 
+  targetComplexity: 0
+  guestCount: 3
   closedRoomRules:
-  - floorIndex: 1
-    closedRoomCount: 0
-  - floorIndex: 2
-    closedRoomCount: 0
-  elevatorStatus: 0
-  floorCount: 2
+  - floorIndex: 0
+    closedRoomCount: 2
+  elevatorStatus: 1
+  floorCount: 1
   roomsPerFloor: 6
   topFloorFirst: 0
   elevatorColumnIndex: 3
   minTraitsPerRoom: 2
-  maxTraitsPerRoom: 3
-  minPreferencesPerGuest: 2
-  maxPreferencesPerGuest: 3
+  maxTraitsPerRoom: 4
+  minPreferencesPerGuest: 1
+  maxPreferencesPerGuest: 2
   possibleGuestNames:
   - Alex
   - Jordan
@@ -59,3 +57,4 @@ MonoBehaviour:
   - Rowan
   - Hayden
   - Skyler
+  - Kerri

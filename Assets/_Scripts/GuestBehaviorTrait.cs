@@ -1,8 +1,7 @@
 public enum GuestBehaviorTrait
 {
     Parties,
-    Smokes,
-    Snores
+    Smokes
 }
 
 public enum GuestRequirement
